@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 import android.graphics.Color;
+
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -33,11 +35,13 @@ public class FibbyAuto22 extends LinearOpMode {
     private DcMotor LF_drive = null;
     private DcMotor RB_drive = null;
     private DcMotor LB_drive = null;
+    private DcMotor DuckSpinner = null;
 
     double LeftPower;
     double RightPower;
     double FrontPower;
     double BackPower;
+    double DuckPower;
     double heading = 0;
     double CorrectionFactor = 0.03;
 
@@ -45,6 +49,9 @@ public class FibbyAuto22 extends LinearOpMode {
     boolean FirstGyroRun = true;
     double rampmotorpower;
     boolean QuestionAnswered = false;
+    boolean RunningToTheShop = false;
+    boolean MadDuckPoints = false;
+    boolean MadDuckPointsRed = false;
 
     double dst_heading;
     public ArrayList allTrackables;
@@ -211,7 +218,6 @@ public class FibbyAuto22 extends LinearOpMode {
                 GyroDriveBase(RampUp,Course,motorpower,true,Right);
             }
 
-
 //turn off motors
         if(StopMotors)
             resetmotors();
@@ -281,7 +287,7 @@ public class FibbyAuto22 extends LinearOpMode {
         FirstGyroRun = true;
     }
     //(ArrayList<VuforiaTrackable> allTrackables, TOOK THIS OUT WILL WANT LATER
-    public void FIBBYSCREAM (boolean Red_Alliance) {
+    public void RunningToTheShop (boolean Red_Alliance) {
 
         boolean RightTurn = true;
         boolean LeftTurn = false;
@@ -289,7 +295,44 @@ public class FibbyAuto22 extends LinearOpMode {
             RightTurn = false;
             LeftTurn = true;
         }
-// ADD AUTO HERE
+// drive towards warehouse
+        drivedeg(-1500, -0.5, 5000, true, 0, true);
+    }
+
+    public void MadDuckPoints (boolean Red_Alliance) {
+
+        boolean RightTurn = true;
+        boolean LeftTurn = false;
+        if (!Red_alliance) {
+            RightTurn = false;
+            LeftTurn = true;
+        }
+        SFtime(500, -.35, true, true, 0, false);
+        sleep(1000);
+        Drivetime(-.25, 2000, true, 0, true);
+        DuckSpinner.setPower(.65);
+        sleep(3000);
+        DuckSpinner.setPower(0);
+        DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        SFtime(1400, -.45, true, true, 0, false);
+        Drivetime(-.25, 1250, true, 0, true);
+    }
+
+    public void MadDuckPointsRed (boolean Red_Alliance) {
+
+        boolean RightTurn = true;
+        boolean LeftTurn = false;
+        if (!Red_alliance) {
+            RightTurn = false;
+            LeftTurn = true;
+        }
+        Drivetime(.35, 250, true, 0, true);
+        SFtime(700, .45, true, true, 0, true);
+        DuckSpinner.setPower(-.65);
+        sleep(3000);
+        DuckSpinner.setPower(0);
+        DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Drivetime(.35, 1700, true, 0, true);
     }
 
     private void checkOrientation() {
@@ -316,18 +359,68 @@ public class FibbyAuto22 extends LinearOpMode {
         LF_drive = hardwareMap.dcMotor.get("LF_drive");
         RB_drive = hardwareMap.dcMotor.get("RB_drive");
         LB_drive = hardwareMap.dcMotor.get("LB_drive");
+        DuckSpinner = hardwareMap.dcMotor.get("DuckSpinner");
 
         RF_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         LF_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RB_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         LB_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        DuckSpinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         AutoTransitioner.transitionOnStop(this, "FibbyTeleOp22");
 
-        while (!isStarted()) {
-            //FIBBYSCREAM(false);
-        drivedeg(1000,100,10000,true,0,true);
+        telemetry.addLine("ALLIANCE: Red or Blue?");
+        telemetry.update();
+        while (QuestionAnswered == false) {
+            if (gamepad1.b) {
+                Red_alliance = true;
+                QuestionAnswered = true;
+            }
+            else if (gamepad1.x){
+                Red_alliance = false;
+                QuestionAnswered = true;
+            }
+        }
 
+        QuestionAnswered = false;
+        telemetry.addLine("Y for RunningToTheShop - A for MadDuckPoints - X for MadDuckPointsRed - B for ");
+        telemetry.update();
+        sleep (1000);
+        while (QuestionAnswered == false) {
+            if (gamepad1.y) {
+                //RunningToTheShop
+                telemetry.addLine("RunningToTheShop");
+                RunningToTheShop = true;
+                QuestionAnswered = true;
+            }
+            if (gamepad1.a){
+                //MadDuckPoints
+                telemetry.addLine("MadDuckPoints");
+                MadDuckPoints = true;
+                QuestionAnswered = true;
+            }
+            if (gamepad1.x) {
+                //MadDuckPointsRed
+                telemetry.addLine("MadDuckPointsRed");
+                MadDuckPointsRed = true;
+                QuestionAnswered = true;
+            }
+            telemetry.update();
+        }
+
+        while (!isStarted()) {
+
+        }
+
+        if (RunningToTheShop)
+        {
+            RunningToTheShop(Red_alliance);
+        }
+        else if (MadDuckPoints){
+            MadDuckPoints(Red_alliance);
+        }
+        else if (MadDuckPointsRed){
+            MadDuckPointsRed(Red_alliance);
         }
         //turn off motors
         resetmotors();

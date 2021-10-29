@@ -148,8 +148,8 @@ public class FibbyTele22 extends OpMode {
                 RB_power = 0;
                 // boom = 0;
             }
-                if (gamepad2.right_bumper) DuckSpinner.setPower(1);
-                else if (gamepad2.left_bumper) DuckSpinner.setPower(-1);
+                if (gamepad2.right_bumper) DuckSpinner.setPower(100);
+                else if (gamepad2.left_bumper) DuckSpinner.setPower(-100);
                 RB_drive.setPower(-RB_power);
                 RF_drive.setPower(-RF_power);
                 // Motors aren't the same gear ratio, correction factor to left motors
