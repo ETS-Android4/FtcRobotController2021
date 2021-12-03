@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -14,17 +15,25 @@ public class FibbyTele22 extends OpMode {
     private DcMotor LF_drive = null;
     private DcMotor RB_drive = null;
     private DcMotor LB_drive = null;
+    private DcMotor xAxis = null;
+    private DcMotor yAxis = null;
+    private DcMotor Intake = null;
     private DcMotor DuckSpinner = null;
+    //private Servo base;
 
     double RF_power = 0;
     double LF_power = 0;
     double RB_power = 0;
     double LB_power = 0;
-    double DuckSpinner_POWER = 0;
+    double xAxis_power = 0;
+    double yAxis_power = 0;
+    double Intake_power = 0;
+    double DuckSpinner_power = 0;
     double timeleft;
     double drive = 0;
     double turn = 0;
     private ElapsedTime runtime = new ElapsedTime();
+    boolean IntakeOn=false;
 
 
     public void reset_encoders () {
@@ -33,12 +42,18 @@ public class FibbyTele22 extends OpMode {
         LF_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RB_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LB_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         RF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RB_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LB_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         DuckSpinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
@@ -47,24 +62,39 @@ public class FibbyTele22 extends OpMode {
         LF_drive = hardwareMap.dcMotor.get("LF_drive");
         RB_drive = hardwareMap.dcMotor.get("RB_drive");
         LB_drive = hardwareMap.dcMotor.get("LB_drive");
+        xAxis = hardwareMap.dcMotor.get("xAxis");
+        yAxis = hardwareMap.dcMotor.get("yAxis");
+        Intake = hardwareMap.dcMotor.get("Intake");
         DuckSpinner = hardwareMap.dcMotor.get("DuckSpinner");
+      //  base = hardwareMap.servo.get("base");
 
         LF_drive.setPower(0);
         RF_drive.setPower(0);
         LB_drive.setPower(0);
         RB_drive.setPower(0);
+        xAxis.setPower(0);
+        yAxis.setPower(0);
+        Intake.setPower(0);
         DuckSpinner.setPower(0);
 
         RF_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LF_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RB_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LB_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RB_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LB_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         DuckSpinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        yAxis.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0", "Starting at %7d :%7d",
@@ -148,14 +178,35 @@ public class FibbyTele22 extends OpMode {
                 RB_power = 0;
                 // boom = 0;
             }
-                if (gamepad2.right_bumper) DuckSpinner.setPower(100);
-                else if (gamepad2.left_bumper) DuckSpinner.setPower(-100);
+            //spin the duck. sike we made that part of the intake hah!
+              //  if (gamepad2.right_bumper) DuckSpinner.setPower(100);
+               // else if (gamepad2.left_bumper) DuckSpinner.setPower(-100);
+
+                //power to turret
+                if(gamepad2.left_trigger !=0) xAxis_power = -gamepad2.left_trigger;
+                else if(gamepad2.right_trigger !=0) xAxis_power = gamepad2.right_trigger;
+                else xAxis_power =0;
+                    //power to arm
+                yAxis_power = -gamepad2.right_stick_y;
+
+                //Intake and MAD DUCK SPINNER power
+                if(gamepad2.dpad_down)
+                    Intake_power = -0.5;
+                else if (gamepad2.dpad_up)
+                    Intake_power = 1;
+                else
+                    Intake_power = 0;
+                
+                //set powers to motors
                 RB_drive.setPower(-RB_power);
                 RF_drive.setPower(-RF_power);
                 // Motors aren't the same gear ratio, correction factor to left motors
                 LB_drive.setPower(LB_power);
                 LF_drive.setPower(LF_power);
-                DuckSpinner.setPower(DuckSpinner_POWER);
+                xAxis.setPower(xAxis_power);
+                yAxis.setPower(yAxis_power);
+                Intake.setPower(Intake_power);
+                DuckSpinner.setPower(DuckSpinner_power);
                 telemetry.addData("Encoders RF RB LF LB", "%7d :%7d :%7d :%7d",
                         RF_drive.getCurrentPosition(),
                         LF_drive.getCurrentPosition(),
@@ -164,12 +215,16 @@ public class FibbyTele22 extends OpMode {
 
                 telemetry.update();
         }
+        
             public void stop() {
                 // turn off all the motors
                 RF_drive.setPower(0);
                 LF_drive.setPower(0);
                 RB_drive.setPower(0);
                 LB_drive.setPower(0);
+                xAxis.setPower(0);
+                yAxis.setPower(0);
+                Intake.setPower(0);
                 DuckSpinner.setPower(0);
 
             }
