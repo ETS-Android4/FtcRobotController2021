@@ -21,6 +21,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Axis;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
@@ -35,13 +37,25 @@ public class FibbyAuto22 extends LinearOpMode {
     private DcMotor LF_drive = null;
     private DcMotor RB_drive = null;
     private DcMotor LB_drive = null;
-    private DcMotor DuckSpinner = null;
+    private DcMotor xAxis = null;
+    private DcMotor yAxis = null;
+    private DcMotor Intake = null;
+
+    private DistanceSensor FrontDist;
+    private DistanceSensor LeftDist;
+    private DistanceSensor RightDist;
+    private DistanceSensor BackDist;
+
+    DigitalChannel xAxisStop;
+    DigitalChannel yAxisStop;
 
     double LeftPower;
     double RightPower;
     double FrontPower;
     double BackPower;
-    double DuckPower;
+    double xAxis_power = 0;
+    double yAxis_power = 0;
+    double Intake_power = 0;
     double heading = 0;
     double CorrectionFactor = 0.03;
 
@@ -50,7 +64,7 @@ public class FibbyAuto22 extends LinearOpMode {
     double rampmotorpower;
     boolean QuestionAnswered = false;
     boolean RunningToTheShop = false;
-    boolean MadDuckPoints = false;
+    boolean MadDuckPointsBlue = false;
     boolean MadDuckPointsRed = false;
 
     double dst_heading;
@@ -153,7 +167,97 @@ public class FibbyAuto22 extends LinearOpMode {
         LF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RB_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LB_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
     }
+    /*public void resetArm(){
+        xAxis.setPower(0);
+        yAxis.setPower(0);
+        Intake.setPower(0);
+
+        xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }*/
+    //-------------------------------------------------------------------------------------------------
+    public void drivedist(int distance, double motorpower, int drivetime, boolean FrontSensor, int Course, boolean RampUp) {
+        if (FrontSensor) {
+            // Check front distance sensor to be sure we're not already too close
+            if (FrontDist.getDistance(DistanceUnit.INCH) > distance) {
+                // Leave motors powered until we close the distance to less than we passed in
+                while ((FrontDist.getDistance(DistanceUnit.INCH) > distance) && (opModeIsActive())) {
+                    GyroDriveBase(RampUp, Course, motorpower, false, false);
+                }
+            } else {
+
+                // Leave motors powered until we close the distance to less than we passed in
+                while ((FrontDist.getDistance(DistanceUnit.INCH) < distance) && (opModeIsActive())) {
+                    GyroDriveBase(RampUp, Course, -motorpower, false, false);
+                }
+            }
+
+
+        }
+        //else is for using back sensor because the boolean frontsensor is false.
+        else {
+            // Check back distance sensor to be sure we're not already too close
+            if (BackDist.getDistance(DistanceUnit.INCH) > distance) {
+                // Leave motors powered until we close the distance to less than we passed in
+                while ((BackDist.getDistance(DistanceUnit.INCH) > distance) && (opModeIsActive())) {
+                    GyroDriveBase(RampUp, Course, -motorpower, false, false);
+                }
+            } else {
+                // Leave motors powered until we expand the distance to more than we passed in
+                while ((BackDist.getDistance(DistanceUnit.INCH) < distance) && (opModeIsActive())) {
+                    GyroDriveBase(RampUp, Course, motorpower, false, false);
+                }
+            }
+        }
+        //turn off motors
+        resetmotors();
+        //pause to give motors a rest NO GRINDING GEARS
+        FirstGyroRun = true;
+       // sleep(drivetime);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    public void SFdist(int dist, double motorpower, boolean distR, boolean StopMotors, boolean Right, int Course, boolean RampUp) {
+        //If we want to use the LEFT distance sensor, then it will go through each of the following while loops to determine which direction to move.
+        if (distR == false) {
+            //This will strafe left using the left distance sensor moving TOWARD the object on the left
+            if (!Right)
+                while ((LeftDist.getDistance(DistanceUnit.INCH) >= dist) && (opModeIsActive())) {
+                    GyroDriveBase(RampUp, Course, motorpower, true, Right);
+                }
+                //This will strafe right using the left distance sensor moving AWAY from the object on the left
+            else while ((LeftDist.getDistance(DistanceUnit.INCH) <= dist) && (opModeIsActive())) {
+                GyroDriveBase(RampUp, Course, motorpower, true, Right);
+            }
+
+        }
+//Use the right Distance Sensor
+        if (distR == true) {
+
+            if (Right)
+                while ((RightDist.getDistance(DistanceUnit.INCH) >= dist) && (opModeIsActive())) {
+                    // Strafe Right
+                    GyroDriveBase(RampUp, Course, motorpower, true, Right);
+                }
+            else while ((RightDist.getDistance(DistanceUnit.INCH) <= dist) && (opModeIsActive())) {
+                //Strafe Left
+                GyroDriveBase(RampUp, Course, motorpower, true, Right);
+            }
+        }
+
+//turn off motors
+        if (StopMotors)
+            resetmotors();
+        FirstGyroRun = true;
+    }
+
     //-------------------------------------------------------------------------------------------------
     public void drivedeg(int drivedegrees, double motorpower, int drivetime, boolean StopMotors, int Course, boolean RampUp) {
         RF_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -224,8 +328,8 @@ public class FibbyAuto22 extends LinearOpMode {
         sleep(drivetime);
         FirstGyroRun = true;
     }
+    
     //-------------------------------------------------------------------------------------------------
-
     public void SpinGyro (double dest_heading, double motorpower, long drivetime, boolean Right, boolean ResetMotors) {
         if (Red_alliance == false) dest_heading = dest_heading * -1;
         long starttime = System.currentTimeMillis();
@@ -259,6 +363,7 @@ public class FibbyAuto22 extends LinearOpMode {
             resetmotors();
         FirstGyroRun = true;
     }
+    //------------------------------------------------------------------------------------------------------------------------------
     public void SFtime(int drivetime, double motorpower, boolean Right, boolean StopMotors, int Course, boolean RampUp){
         long starttime = System.currentTimeMillis();
         //This will strafe left
@@ -270,6 +375,7 @@ public class FibbyAuto22 extends LinearOpMode {
             resetmotors();
         FirstGyroRun = true;
     }
+    //------------------------------------------------------------------------------------------------------------------------------
     public void Drivetime(double motorpower, int drivetime, boolean StopMotors, int Course, boolean RampUp){
         long starttime = System.currentTimeMillis();
         //Run Forwards
@@ -286,7 +392,48 @@ public class FibbyAuto22 extends LinearOpMode {
             resetmotors();
         FirstGyroRun = true;
     }
+    //------------------------------------------------------------------------------------------------------------------------------
+private void MoveXAxisDeg (int deg, double motorPower,int time) {
+      xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        xAxis.setTargetPosition(deg);
+
+        xAxis.setPower(motorPower);
+
+        xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    if ((xAxis.getCurrentPosition() >= deg-5) && (xAxis.getCurrentPosition() <= deg+5))//Are we there yet??
+    {
+        xAxis.setPower(0);
+    }
+
+        //sleep(time);
+
+    //set motor to 0 after in run
+       // xAxis.setPower(0);
+
+        //xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+}
+    //--------------------------------------------------------------------------------------------------------------------------
+
+    private void MoveYAxisDeg (int deg,double motorPower,int time) {
+        yAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        yAxis.setTargetPosition(deg);
+        yAxis.setPower(motorPower);
+        yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        if ((yAxis.getCurrentPosition() >= deg-5) && (yAxis.getCurrentPosition() <= deg+5))//Are we there yet??
+        {
+            yAxis.setPower(0);
+        }
+        //sleep(time);
+
+        //yAxis.setPower(0);
+
+        //yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+    //-------------------------------------------------------------------------------------------------------------------------
     //(ArrayList<VuforiaTrackable> allTrackables, TOOK THIS OUT WILL WANT LATER
+    //start of our runs!
     public void RunningToTheShop (boolean Red_Alliance) {
 
         boolean RightTurn = true;
@@ -298,8 +445,8 @@ public class FibbyAuto22 extends LinearOpMode {
 // drive towards warehouse
         drivedeg(-1500, -0.5, 5000, true, 0, true);
     }
-
-    public void MadDuckPoints (boolean Red_Alliance) {
+//------------------------------------------------------------------------------------------------------------------------------
+    public void MadDuckPointsBlue (boolean Red_Alliance) {
 
         boolean RightTurn = true;
         boolean LeftTurn = false;
@@ -307,15 +454,41 @@ public class FibbyAuto22 extends LinearOpMode {
             RightTurn = false;
             LeftTurn = true;
         }
-        SFtime(500, -.35, true, true, 0, false);
+        MoveYAxisDeg(1300,0.5,1000);
+        SFdist(10, 0.4, false, true, true, 0, true);
+        drivedist(3, 0.4, 4000, false, 0, true);
+     // yAxis.setPower(0);
+        MoveXAxisDeg(-1000,0.3,1000);
+        sleep(1500);
+        //SFdist(9,0.3,false,true,false,0,true);
+        Intake.setPower(1);
+        sleep(2000);
+        Intake.setPower(0);
+        MoveXAxisDeg(1530,0.3,1000);
+        drivedist(50,0.5,1000,false,0,true);
+       //
+        // drivedeg(100,0.5,1000,true,0,true);
+        MoveYAxisDeg(2000,0.3,1000);
+        SFdist(30,0.4,false,true,true,0,true);
         sleep(1000);
-        Drivetime(-.25, 2000, true, 0, true);
-        DuckSpinner.setPower(.65);
-        sleep(3000);
-        DuckSpinner.setPower(0);
-        DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        SFtime(1400, -.45, true, true, 0, false);
-        Drivetime(-.25, 1250, true, 0, true);
+        Intake.setPower(-0.5);
+        sleep(2000);
+        Intake.setPower(0);
+        MoveXAxisDeg(0,0.3,1000);
+        MoveYAxisDeg(2021,0.5,1000);
+        drivedist(3,0.5,1000,false,0,true);
+        //return home
+        MoveYAxisDeg(1300,0.3,1000);
+
+
+       // SFtime(500, -.35, true, true, 0, false);
+
+        //sleep(1000);
+       // Drivetime(-.25, 2000, true, 0, true);
+
+        //sleep(3000);
+       // SFtime(1400, -.45, true, true, 0, false);
+        //Drivetime(-.25, 1250, true, 0, true);
     }
 
     public void MadDuckPointsRed (boolean Red_Alliance) {
@@ -328,13 +501,13 @@ public class FibbyAuto22 extends LinearOpMode {
         }
         Drivetime(.35, 250, true, 0, true);
         SFtime(700, .45, true, true, 0, true);
-        DuckSpinner.setPower(-.65);
+     //   DuckSpinner.setPower(-.65);
         sleep(3000);
-        DuckSpinner.setPower(0);
-        DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       // DuckSpinner.setPower(0);
+        //DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Drivetime(.35, 1700, true, 0, true);
     }
-
+//--------------------------------------------------------------------------------------------------------------------------------
     private void checkOrientation() {
 // read the orientation of the robot
         angles = this.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -342,6 +515,7 @@ public class FibbyAuto22 extends LinearOpMode {
 // and save the heading
         heading = angles.firstAngle;
     }
+    //------------------------------------------------------------------------------------------------------------------------------
     public void runOpMode() {
         //Prepare IMU to read gyro
         BNO055IMU.Parameters gyro_parameters = new BNO055IMU.Parameters();
@@ -359,15 +533,51 @@ public class FibbyAuto22 extends LinearOpMode {
         LF_drive = hardwareMap.dcMotor.get("LF_drive");
         RB_drive = hardwareMap.dcMotor.get("RB_drive");
         LB_drive = hardwareMap.dcMotor.get("LB_drive");
-        DuckSpinner = hardwareMap.dcMotor.get("DuckSpinner");
+        xAxis = hardwareMap.dcMotor.get("xAxis");
+        yAxis = hardwareMap.dcMotor.get("yAxis");
+        Intake = hardwareMap.dcMotor.get("Intake");
+
+        LeftDist = hardwareMap.get(DistanceSensor.class, "LeftDist");
+
+        RightDist = hardwareMap.get(DistanceSensor.class, "RightDist");
+
+        FrontDist = hardwareMap.get(DistanceSensor.class, "FrontDist");
+
+        BackDist = hardwareMap.get(DistanceSensor.class, "BackDist");
+
+        xAxisStop = hardwareMap.get(DigitalChannel.class, "xAxisStop");
+        xAxisStop.setMode(DigitalChannel.Mode.INPUT);
+        yAxisStop = hardwareMap.get(DigitalChannel.class, "yAxisStop");
+        yAxisStop.setMode(DigitalChannel.Mode.INPUT);
+        //DuckSpinner = hardwareMap.dcMotor.get("DuckSpinner");
 
         RF_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         LF_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RB_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         LB_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        DuckSpinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        xAxis.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        yAxis.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       // DuckSpinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        AutoTransitioner.transitionOnStop(this, "FibbyTeleOp22");
+       // AutoTransitioner.transitionOnStop(this, "FibbyTeleOp22");
+        if (yAxisStop.getState()==true) //Is the arm all the way down on the limit switch?
+            while (xAxisStop.getState()== false)  xAxis.setPower(0.1);//Move the arm right until the limit switch is triggered
+        xAxis.setPower(0);
+        xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //
+
+        xAxis.setTargetPosition(-30);
+        xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        xAxis.setPower(0.1);
+        while(xAxis.getCurrentPosition() >=-25)
+        {}
+        xAxis.setPower(0);
+        xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         telemetry.addLine("ALLIANCE: Red or Blue?");
         telemetry.update();
@@ -396,7 +606,7 @@ public class FibbyAuto22 extends LinearOpMode {
             if (gamepad1.a){
                 //MadDuckPoints
                 telemetry.addLine("MadDuckPoints");
-                MadDuckPoints = true;
+                MadDuckPointsBlue = true;
                 QuestionAnswered = true;
             }
             if (gamepad1.x) {
@@ -416,8 +626,8 @@ public class FibbyAuto22 extends LinearOpMode {
         {
             RunningToTheShop(Red_alliance);
         }
-        else if (MadDuckPoints){
-            MadDuckPoints(Red_alliance);
+        else if (MadDuckPointsBlue){
+            MadDuckPointsBlue(Red_alliance);
         }
         else if (MadDuckPointsRed){
             MadDuckPointsRed(Red_alliance);

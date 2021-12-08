@@ -45,17 +45,17 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 //@Disabled
 public class SensorDistAll extends LinearOpMode {
 
-    private DistanceSensor distleft;
-    private DistanceSensor distright;
-    private DistanceSensor distfront;
-    private DistanceSensor distback;
+    private DistanceSensor LeftDist;
+    private DistanceSensor RightDist;
+    private DistanceSensor FrontDist;
+    private DistanceSensor BackDist;
     @Override
     public void runOpMode() {
         // you can use this as a regular DistanceSensor.
-        distleft = hardwareMap.get(DistanceSensor.class, "distleft");
-        distright = hardwareMap.get(DistanceSensor.class, "distright");
-        distfront = hardwareMap.get(DistanceSensor.class, "distfront");
-        distback = hardwareMap.get(DistanceSensor.class, "distback");
+        LeftDist = hardwareMap.get(DistanceSensor.class, "LeftDist");
+        RightDist = hardwareMap.get(DistanceSensor.class, "RightDist");
+        FrontDist = hardwareMap.get(DistanceSensor.class, "FrontDist");
+        BackDist = hardwareMap.get(DistanceSensor.class, "BackDist");
         telemetry.addData(">>", "Press start to continue");
         telemetry.update();
 
@@ -68,10 +68,10 @@ public class SensorDistAll extends LinearOpMode {
             telemetry.addData("range", String.format("%.01f m", sensorRange.getDistance(DistanceUnit.METER)));
 
            */
-            telemetry.addData("Front (IN)", String.format("%.01f in", distfront.getDistance(DistanceUnit.INCH)));
-            telemetry.addData("Left (IN)", String.format("%.01f in", distleft.getDistance(DistanceUnit.INCH)));
-            telemetry.addData("Right (IN)", String.format("%.01f in", distright.getDistance(DistanceUnit.INCH)));
-            telemetry.addData("Back (IN)", String.format("%.01f in", distback.getDistance(DistanceUnit.INCH)));
+            telemetry.addData("Front (IN)", String.format("%.01f in", FrontDist.getDistance(DistanceUnit.INCH)));
+            telemetry.addData("Left (IN)", String.format("%.01f in", LeftDist.getDistance(DistanceUnit.INCH)));
+            telemetry.addData("Right (IN)", String.format("%.01f in", RightDist.getDistance(DistanceUnit.INCH)));
+            telemetry.addData("Back (IN)", String.format("%.01f in", BackDist.getDistance(DistanceUnit.INCH)));
             // Rev2mDistanceSensor specific methods.
           /*  telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
             telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
