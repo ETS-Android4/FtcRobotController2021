@@ -64,8 +64,10 @@ public class FibbyAuto22 extends LinearOpMode {
     double rampmotorpower;
     boolean QuestionAnswered = false;
     boolean RunningToTheShop = false;
-    boolean MadDuckPointsBlue = false;
+    boolean MadDuckPoints = false;
     boolean MadDuckPointsRed = false;
+    boolean RightTurn = false;
+    boolean LeftTurn = false;
 
     double dst_heading;
     public ArrayList allTrackables;
@@ -442,70 +444,140 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
             RightTurn = false;
             LeftTurn = true;
         }
-// drive towards warehouse
-        drivedeg(-1500, -0.5, 5000, true, 0, true);
+
+        // lift arm up y axis
+        MoveYAxisDeg(2000,0.4,1000);
+        // strafe off wall 15 inches
+        SFdist(15, 0.5, RightTurn, true, LeftTurn, 0, true);
+        // drive backwards
+        if(Red_Alliance)
+        {
+            drivedeg(-500, -0.4 , 1000, true, 0, true);
+        }
+        else if (!Red_Alliance)
+        {
+            drivedeg(-700, -0.4 , 1000, true, 0, true);
+        }
+        // strafe farther from wall 25 inches
+        SFdist(24, 0.5, RightTurn, true, LeftTurn, 0, true);
+        // turn arm towards the hub
+        if(Red_Alliance)
+        {
+            MoveXAxisDeg(-1630,0.4,1000);
+        }
+        else if (!Red_Alliance)
+        {
+            MoveXAxisDeg(1630,0.4,1000);
+        }
+        sleep(3000);
+        // drop waffle
+        Intake.setPower(-.7);
+        sleep(500);
+        Intake.setPower(0);
+        // set arm x axis to 0
+        MoveXAxisDeg(0,0.4,1000);
+        // strafe to wall 15 inches
+        SFdist(18, 0.5, RightTurn, true, RightTurn, 0, true);
+        // drive forward
+        drivedeg(450, 0.4 , 1000, true, 0, true);
+        // strafe to wall 1 inches
+        SFdist(1, 0.5, RightTurn, true, RightTurn, 0, true);
+        // drive into the warehouse
+        drivedeg(2000, .4, 1000, true, 0, true);
+        // strafe to the left
+        if(Red_Alliance)
+        {
+            SFdist(26, .4, RightTurn, true, LeftTurn, 0, true);
+        }
+        else if(!Red_Alliance)
+        {
+            SFdist(28, .4, RightTurn, true, LeftTurn, 0, true);
+        }
+        // Im in spain without the a
+        if(Red_Alliance)
+        {
+            SpinGyro(-90, .4, 10000, true, false);
+            SFdist(3, 0.4, false, true, false, 90, true);
+        }
+        else if(!Red_Alliance)
+        {
+            SpinGyro(-90, .4, 10000, false, false);
+            SFdist(3, 0.4, true, true, true, 90, true);
+        }
+        // set arm y axis down
+        MoveYAxisDeg(1000,0.4,1000);
+        sleep(500);
+
     }
 //------------------------------------------------------------------------------------------------------------------------------
-    public void MadDuckPointsBlue (boolean Red_Alliance) {
+    public void MadDuckPoints (boolean Red_Alliance) {
+        //depending on the turn you are making just put the left or right respectively
+        // if red
+     RightTurn = true;
+     LeftTurn = false;
+        //if blue
 
-        boolean RightTurn = true;
-        boolean LeftTurn = false;
         if (!Red_alliance) {
             RightTurn = false;
             LeftTurn = true;
         }
+
         MoveYAxisDeg(1300,0.5,1000);
-        SFdist(10, 0.4, false, true, true, 0, true);
+        sleep(1000);
+        SFdist(9, 0.4, RightTurn, true, LeftTurn, 0, true);
         drivedist(3, 0.4, 4000, false, 0, true);
-     // yAxis.setPower(0);
-        MoveXAxisDeg(-1000,0.3,1000);
+        if(Red_Alliance) {
+            //MoveXAxisDeg(1000, 0.3, 1000);
+            SFdist(8,0.4,true,true,true,0,true);
+        }
+        else if (!Red_Alliance){
+            MoveXAxisDeg(-1000, 0.3, 1000);
+        }
         sleep(1500);
-        //SFdist(9,0.3,false,true,false,0,true);
         Intake.setPower(1);
         sleep(2000);
         Intake.setPower(0);
-        MoveXAxisDeg(1530,0.3,1000);
+        if (Red_Alliance){
+            MoveXAxisDeg(-1530,0.3,1000);
+        }
+        else if (!Red_Alliance){
+            MoveXAxisDeg(1530,0.3,1000);
+        }
         drivedist(50,0.5,1000,false,0,true);
        //
-        // drivedeg(100,0.5,1000,true,0,true);
         MoveYAxisDeg(2000,0.3,1000);
-        SFdist(30,0.4,false,true,true,0,true);
+        SFdist(26,0.4,RightTurn,true,LeftTurn,0,true);
         sleep(1000);
         Intake.setPower(-0.5);
         sleep(2000);
         Intake.setPower(0);
+        //move arms to clear
         MoveXAxisDeg(0,0.3,1000);
         MoveYAxisDeg(2021,0.5,1000);
+        //strafe away from the vision element so we dont get stuck
+        SFdist(20,0.4,RightTurn,true,RightTurn,0,true);
+        //back up to the box and wall
         drivedist(3,0.5,1000,false,0,true);
+        //strafe into the box
+        SFdist(30,0.4,RightTurn,true,LeftTurn,0,true);
         //return home
         MoveYAxisDeg(1300,0.3,1000);
+        //let the arm finish moving
+        sleep(500);
 
 
-       // SFtime(500, -.35, true, true, 0, false);
-
-        //sleep(1000);
-       // Drivetime(-.25, 2000, true, 0, true);
-
-        //sleep(3000);
-       // SFtime(1400, -.45, true, true, 0, false);
-        //Drivetime(-.25, 1250, true, 0, true);
     }
 
     public void MadDuckPointsRed (boolean Red_Alliance) {
-
+        //if red
         boolean RightTurn = true;
         boolean LeftTurn = false;
+        //if blue
         if (!Red_alliance) {
             RightTurn = false;
             LeftTurn = true;
         }
-        Drivetime(.35, 250, true, 0, true);
-        SFtime(700, .45, true, true, 0, true);
-     //   DuckSpinner.setPower(-.65);
-        sleep(3000);
-       // DuckSpinner.setPower(0);
-        //DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Drivetime(.35, 1700, true, 0, true);
+
     }
 //--------------------------------------------------------------------------------------------------------------------------------
     private void checkOrientation() {
@@ -568,10 +640,10 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //
 
-        xAxis.setTargetPosition(-30);
+        xAxis.setTargetPosition(-40);
         xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         xAxis.setPower(0.1);
-        while(xAxis.getCurrentPosition() >=-25)
+        while(xAxis.getCurrentPosition() >=-35)
         {}
         xAxis.setPower(0);
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -606,7 +678,7 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
             if (gamepad1.a){
                 //MadDuckPoints
                 telemetry.addLine("MadDuckPoints");
-                MadDuckPointsBlue = true;
+                MadDuckPoints = true;
                 QuestionAnswered = true;
             }
             if (gamepad1.x) {
@@ -626,8 +698,8 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         {
             RunningToTheShop(Red_alliance);
         }
-        else if (MadDuckPointsBlue){
-            MadDuckPointsBlue(Red_alliance);
+        else if (MadDuckPoints){
+            MadDuckPoints(Red_alliance);
         }
         else if (MadDuckPointsRed){
             MadDuckPointsRed(Red_alliance);

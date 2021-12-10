@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -115,7 +116,6 @@ public class FibbyTele22 extends OpMode {
         RB_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LB_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
        // DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -123,12 +123,15 @@ public class FibbyTele22 extends OpMode {
         RB_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LB_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
        // DuckSpinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        yAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         yAxis.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
+        yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        yAxis.setDirection(DcMotor.Direction.FORWARD);
+        xAxis.setDirection(DcMotor.Direction.FORWARD);
         // send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0", "Starting at %7d :%7d",
                 RF_drive.getCurrentPosition(),
@@ -140,28 +143,27 @@ public class FibbyTele22 extends OpMode {
         // Put boom home and reset encoders
 
         if (yAxisStop.getState()==true) //Is the arm all the way down on the limit switch?
-        while (xAxisStop.getState()== false)  xAxis.setPower(0.1);//Move the arm right until the limit switch is triggered
+        while (xAxisStop.getState()== false)  xAxis.setPower(0.2);//Move the arm right until the limit switch is triggered
         xAxis.setPower(0);
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //
-        xDestinationPosition=-30;
+        xDestinationPosition=-38;
         xAxis.setTargetPosition(xDestinationPosition);
         xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        xAxis.setPower(0.1);
+        xAxis.setPower(0.2);
         while(xAxis.getCurrentPosition() >= xDestinationPosition+5)
         {}
         xAxis.setPower(0);
         xDestinationPosition=0;
+
+        //yAxis.setPower(0.4);
+        //while (yAxis.getCurrentPosition() < 500) {}
+        //yAxis.setPower(0);
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        /*
-        while (yAxisStop.getState()== false)
-            yAxis.setPower(-10);
-        yAxis.setPower(0);
-*/
+
     }
         public void start () {
             runtime.reset();
@@ -249,6 +251,7 @@ public class FibbyTele22 extends OpMode {
                     xAxisMoveComplete = true;
                     yAxisMoveComplete = true;
                     BoomMoveComplete = true;
+                    BoomParkMoveRequest=false;
                 }
                 //power to turret
                 if(gamepad2.left_trigger !=0) xAxis_power = -gamepad2.left_trigger;
@@ -261,10 +264,11 @@ public class FibbyTele22 extends OpMode {
                     yAxisEncoder = false;
                     xAxisEncoder = false;
                     yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     xAxisMoveComplete = true;
                     yAxisMoveComplete = true;
                     BoomMoveComplete = true;
+                    BoomParkMoveRequest=false;
                 }
                     //power to arm
                 if ((gamepad2.right_stick_y < 0) || (gamepad2.right_stick_y > 0 && yAxisStop.getState()== false))
@@ -275,6 +279,10 @@ public class FibbyTele22 extends OpMode {
                 //boom presets
                 if (gamepad2.a || gamepad2.b || gamepad2.x)//Set motors to run using encoder
                 {
+                    xAxisMoveComplete = true;
+                    yAxisMoveComplete = true;
+                    BoomMoveComplete = true;
+                    BoomParkMoveRequest=false;
                     xAxisEncoder = true;
                     xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     yAxisEncoder = true;
@@ -329,12 +337,15 @@ public class FibbyTele22 extends OpMode {
                 }}
                 if ((yAxisMoveComplete == true) && (xAxisMoveComplete == false))
                 {
-                    if(((xDestinationPosition < 0) && (xDestinationPosition+5) >= (xAxis.getCurrentPosition()))
-                        || ((xDestinationPosition > 0 ) && (xDestinationPosition-5) <= (xAxis.getCurrentPosition()))
-                        || ((xDestinationPosition == 0 ) && ((xDestinationPosition-2) <= (xAxis.getCurrentPosition()) && ((xDestinationPosition+2) >= (xAxis.getCurrentPosition())))))
+                    if(((xDestinationPosition < 0) && (xDestinationPosition+1) >= (xAxis.getCurrentPosition()))
+                        || ((xDestinationPosition > 0 ) && (xDestinationPosition-1) <= (xAxis.getCurrentPosition()))
+                        || ((xDestinationPosition == 0 ) && ((xDestinationPosition) <= (xAxis.getCurrentPosition()) && ((xDestinationPosition+2) >= (xAxis.getCurrentPosition())))))
                     {
+                        //if we've achieved our position, turn the xAxis motor off and reset to allow control from the controller
                      xAxisMoveComplete = true;
                      xAxis.setPower(0);
+                     xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                     xAxisEncoder = false;
                     }
                 }
 
