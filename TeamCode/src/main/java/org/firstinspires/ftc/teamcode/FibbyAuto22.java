@@ -632,7 +632,7 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         Intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
        // DuckSpinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-       // AutoTransitioner.transitionOnStop(this, "FibbyTeleOp22");
+        AutoTransitioner.transitionOnStop(this, "FibbyTeleOp22");
         if (yAxisStop.getState()==true) //Is the arm all the way down on the limit switch?
             while (xAxisStop.getState()== false)  xAxis.setPower(0.1);//Move the arm right until the limit switch is triggered
         xAxis.setPower(0);
