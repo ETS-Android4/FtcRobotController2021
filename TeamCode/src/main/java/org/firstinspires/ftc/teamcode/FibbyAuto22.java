@@ -48,6 +48,7 @@ public class FibbyAuto22 extends LinearOpMode {
 
     DigitalChannel xAxisStop;
     DigitalChannel yAxisStop;
+    DigitalChannel yAxisTopStop;
 
     double LeftPower;
     double RightPower;
@@ -446,7 +447,7 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         }
 
         // lift arm up y axis
-        MoveYAxisDeg(2000,0.4,1000);
+        MoveYAxisDeg(2100,0.4,1000);
         // strafe off wall 15 inches
         SFdist(15, 0.5, RightTurn, true, LeftTurn, 0, true);
         // drive backwards
@@ -459,14 +460,15 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
             drivedeg(-700, -0.4 , 1000, true, 0, true);
         }
         // strafe farther from wall 25 inches
-        SFdist(24, 0.5, RightTurn, true, LeftTurn, 0, true);
         // turn arm towards the hub
         if(Red_Alliance)
         {
+            SFdist(24, 0.5, RightTurn, true, LeftTurn, 0, true);
             MoveXAxisDeg(-1630,0.4,1000);
         }
         else if (!Red_Alliance)
         {
+            SFdist(26, 0.5, RightTurn, true, LeftTurn, 0, true);
             MoveXAxisDeg(1630,0.4,1000);
         }
         sleep(3000);
@@ -475,7 +477,7 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         sleep(500);
         Intake.setPower(0);
         // set arm x axis to 0
-        MoveXAxisDeg(0,0.4,1000);
+        MoveXAxisDeg(-2,0.4,1000);
         // strafe to wall 15 inches
         SFdist(18, 0.5, RightTurn, true, RightTurn, 0, true);
         // drive forward
@@ -505,8 +507,8 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
             SFdist(3, 0.4, true, true, true, 90, true);
         }
         // set arm y axis down
-        MoveYAxisDeg(1000,0.4,1000);
-        sleep(500);
+        MoveYAxisDeg(1100,0.4,1000);
+        sleep(1000);
 
     }
 //------------------------------------------------------------------------------------------------------------------------------
@@ -522,13 +524,13 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
             LeftTurn = true;
         }
 
-        MoveYAxisDeg(1300,0.5,1000);
+        MoveYAxisDeg(1400,0.5,1000);
         sleep(1000);
         SFdist(9, 0.4, RightTurn, true, LeftTurn, 0, true);
         drivedist(3, 0.4, 4000, false, 0, true);
         if(Red_Alliance) {
             //MoveXAxisDeg(1000, 0.3, 1000);
-            SFdist(8,0.4,true,true,true,0,true);
+            SFdist(7,0.4,true,true,true,0,true);
         }
         else if (!Red_Alliance){
             MoveXAxisDeg(-1000, 0.3, 1000);
@@ -545,15 +547,15 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         }
         drivedist(50,0.5,1000,false,0,true);
        //
-        MoveYAxisDeg(2000,0.3,1000);
-        SFdist(26,0.4,RightTurn,true,LeftTurn,0,true);
+        MoveYAxisDeg(2100,0.3,1000);
+        SFdist(24,0.4,RightTurn,true,LeftTurn,0,true);
         sleep(1000);
         Intake.setPower(-0.5);
         sleep(2000);
         Intake.setPower(0);
         //move arms to clear
-        MoveXAxisDeg(0,0.3,1000);
-        MoveYAxisDeg(2021,0.5,1000);
+        MoveXAxisDeg(-2,0.3,1000);
+        MoveYAxisDeg(2121,0.5,1000);
         //strafe away from the vision element so we dont get stuck
         SFdist(20,0.4,RightTurn,true,RightTurn,0,true);
         //back up to the box and wall
@@ -561,9 +563,9 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         //strafe into the box
         SFdist(30,0.4,RightTurn,true,LeftTurn,0,true);
         //return home
-        MoveYAxisDeg(1300,0.3,1000);
+        MoveYAxisDeg(1400,0.3,1000);
         //let the arm finish moving
-        sleep(500);
+        sleep(1000);
 
 
     }
@@ -621,6 +623,8 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         xAxisStop.setMode(DigitalChannel.Mode.INPUT);
         yAxisStop = hardwareMap.get(DigitalChannel.class, "yAxisStop");
         yAxisStop.setMode(DigitalChannel.Mode.INPUT);
+        yAxisTopStop = hardwareMap.get(DigitalChannel.class, "yAxisTopStop");
+        yAxisStop.setMode(DigitalChannel.Mode.INPUT);
         //DuckSpinner = hardwareMap.dcMotor.get("DuckSpinner");
 
         RF_drive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -634,7 +638,7 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
 
         AutoTransitioner.transitionOnStop(this, "FibbyTeleOp22");
         if (yAxisStop.getState()==true) //Is the arm all the way down on the limit switch?
-            while (xAxisStop.getState()== false)  xAxis.setPower(0.1);//Move the arm right until the limit switch is triggered
+            while (xAxisStop.getState()== false)  xAxis.setPower(0.2);//Move the arm right until the limit switch is triggered
         xAxis.setPower(0);
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -683,7 +687,7 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
             }
             if (gamepad1.x) {
                 //MadDuckPointsRed
-                telemetry.addLine("MadDuckPointsRed");
+                telemetry.addLine("SomethingNew");
                 MadDuckPointsRed = true;
                 QuestionAnswered = true;
             }

@@ -32,8 +32,7 @@ public class FibbyTele22 extends OpMode {
 
     DigitalChannel xAxisStop;
     DigitalChannel yAxisStop;
-   // private DcMotor DuckSpinner = null;
-    //private Servo base;
+    DigitalChannel yAxisTopStop;
 
     double RF_power = 0;
     double LF_power = 0;
@@ -42,7 +41,9 @@ public class FibbyTele22 extends OpMode {
     double xAxis_power = 0;
     double yAxis_power = 0;
     double Intake_power = 0;
-    double DuckSpinner_power = 0;
+    double yAxis_position = 0;
+    double xAxis_position = 0;
+    //double DuckSpinner_power = 0;
     double timeleft;
     double drive = 0;
     double turn = 0;
@@ -54,7 +55,10 @@ public class FibbyTele22 extends OpMode {
     boolean yAxisMoveComplete = true;
     boolean BoomMoveComplete = true;
     boolean BoomParkMoveRequest = false;
+    boolean AutoMode = false;
+    char AutoButtonPressed = 'o';
     int xDestinationPosition = 0;
+
 
     public void reset_encoders () {
 
@@ -65,7 +69,6 @@ public class FibbyTele22 extends OpMode {
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       // DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         RF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -74,7 +77,6 @@ public class FibbyTele22 extends OpMode {
         xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-       // DuckSpinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public void init () {
@@ -91,6 +93,8 @@ public class FibbyTele22 extends OpMode {
         xAxisStop.setMode(DigitalChannel.Mode.INPUT);
         yAxisStop = hardwareMap.get(DigitalChannel.class, "yAxisStop");
         yAxisStop.setMode(DigitalChannel.Mode.INPUT);
+        yAxisTopStop = hardwareMap.get(DigitalChannel.class, "yAxisTopStop");
+        yAxisTopStop.setMode(DigitalChannel.Mode.INPUT);
 
         LeftDist = hardwareMap.get(DistanceSensor.class, "LeftDist");
 
@@ -111,26 +115,14 @@ public class FibbyTele22 extends OpMode {
         Intake.setPower(0);
       //  DuckSpinner.setPower(0);
 
-        RF_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LF_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RB_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LB_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-       // DuckSpinner.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        RB_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LB_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-       // DuckSpinner.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         yAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         yAxis.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         yAxis.setDirection(DcMotor.Direction.FORWARD);
+        xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        xAxis.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         xAxis.setDirection(DcMotor.Direction.FORWARD);
         // send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0", "Starting at %7d :%7d",
@@ -142,12 +134,10 @@ public class FibbyTele22 extends OpMode {
         timeleft = 120;
         // Put boom home and reset encoders
 
-        if (yAxisStop.getState()==true) //Is the arm all the way down on the limit switch?
+        /*if (yAxisStop.getState()==true) //Is the arm all the way down on the limit switch?
         while (xAxisStop.getState()== false)  xAxis.setPower(0.2);//Move the arm right until the limit switch is triggered
         xAxis.setPower(0);
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        //
         xDestinationPosition=-38;
         xAxis.setTargetPosition(xDestinationPosition);
         xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -156,14 +146,10 @@ public class FibbyTele22 extends OpMode {
         {}
         xAxis.setPower(0);
         xDestinationPosition=0;
-
-        //yAxis.setPower(0.4);
-        //while (yAxis.getCurrentPosition() < 500) {}
-        //yAxis.setPower(0);
+         */
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
     }
         public void start () {
             runtime.reset();
@@ -174,8 +160,6 @@ public class FibbyTele22 extends OpMode {
                 drive = -gamepad1.right_stick_y;
                 turn = gamepad1.left_stick_x;
 
-
-                //
                 if (turn < 0) {
                     LF_power = drive + turn;
                     LB_power = drive + turn;
@@ -183,7 +167,7 @@ public class FibbyTele22 extends OpMode {
                     RB_power = drive;
                 }
 
-                //
+
                 else if (turn > 0) {
                     LF_power = drive;
                     LB_power = drive;
@@ -235,137 +219,273 @@ public class FibbyTele22 extends OpMode {
                 LB_power = 0;
                 RF_power = 0;
                 RB_power = 0;
-                // boom = 0;
             }
             //spin the duck. sike we made that part of the intake hah!
               //  if (gamepad2.right_bumper) DuckSpinner.setPower(100);
                // else if (gamepad2.left_bumper) DuckSpinner.setPower(-100);
+//==================================================================================================================================
 
-                //If the x Axis motor is set to run on encoder and the triggers are being touched, switch the motor to run without encoder
-                if(((gamepad2.left_trigger !=0) || (gamepad2.right_trigger!=0)) && (xAxisEncoder==true))
+                if (gamepad2.left_trigger != 0 || gamepad2.right_trigger !=0 || gamepad2.right_stick_y !=0) // is the driver trying to manually control
                 {
-                    yAxisEncoder = false;
-                    xAxisEncoder = false;
-                    yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    xAxisMoveComplete = true;
-                    yAxisMoveComplete = true;
-                    BoomMoveComplete = true;
-                    BoomParkMoveRequest=false;
-                }
-                //power to turret
-                if(gamepad2.left_trigger !=0) xAxis_power = -gamepad2.left_trigger;
-                else if(gamepad2.right_trigger !=0 && xAxisStop.getState()== false) xAxis_power = gamepad2.right_trigger;
-                else xAxis_power =0;
+                    if (AutoMode)
+                    {
+                        yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        AutoMode = false;
+                        AutoButtonPressed = 'p';
+                    }
 
-                //If the y Axis motor is set to run on encoder and the right stick is being pushed up or down, switch the motor to run without encoder
-                if((gamepad2.right_stick_y !=0) && (yAxisEncoder==true))
-                {
-                    yAxisEncoder = false;
-                    xAxisEncoder = false;
-                    yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    xAxisMoveComplete = true;
-                    yAxisMoveComplete = true;
-                    BoomMoveComplete = true;
-                    BoomParkMoveRequest=false;
-                }
+                    //Read game controller for motor powers
+                    //power to turret
+                    if(gamepad2.left_trigger !=0) xAxis_power = -gamepad2.left_trigger*0.35;
+                    else if(gamepad2.right_trigger !=0 && xAxisStop.getState()== false)
+
+                        xAxis_power = gamepad2.right_trigger*0.35;
+
+                    else xAxis_power = 0;
                     //power to arm
-                if ((gamepad2.right_stick_y < 0) || (gamepad2.right_stick_y > 0 && yAxisStop.getState()== false))
-                   yAxis_power = gamepad2.right_stick_y;
-                else
+                    if ((gamepad2.right_stick_y < 0 && yAxisTopStop.getState()== false) || (gamepad2.right_stick_y > 0 && yAxisStop.getState()== false))
+                    {
+                        yAxis_power = gamepad2.right_stick_y*0.4;
+                    }
+                        else
+                        yAxis_power = 0;
+                }
+
+                else if (gamepad2.a || gamepad2.b || gamepad2.x || gamepad2.y|| gamepad2.right_bumper||gamepad2.left_bumper)
+                {
+                    if ((AutoButtonPressed == 'a' && gamepad2.a) || (AutoButtonPressed == 'b' && gamepad2.b) || (AutoButtonPressed == 'x' && gamepad2.x) || (AutoButtonPressed == 'y' && gamepad2.y)|| (AutoButtonPressed == 'r' && gamepad2.right_bumper)||(AutoButtonPressed == 'l' && gamepad2.left_bumper))
+                    {} //We're using this if statement to prevent resetting the encoders and booleans multiple times when the bottom is held past the first loop through this code
+                    //By doing this, we're preventing repeatedly resetting and causing false starts/stops. The interrupt functionality still works though.
+                    else if (!AutoMode || AutoButtonPressed == 'a' || AutoButtonPressed == 'b' || AutoButtonPressed == 'x' || AutoButtonPressed == 'y'|| AutoButtonPressed == 'l'|| AutoButtonPressed == 'r') //We are looking for the AutoButtonPressed variable as a b or x to look for the buttom being pressed multiple times
+                    {
+                        yAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        yAxis.setPower(0);
+                        xAxis.setPower(0);
+                        AutoMode = true;
+                        yAxisMoveComplete=true;
+                        xAxisMoveComplete=true;
+                        BoomMoveComplete=true;
+                    }
+
+
+
+                    if (gamepad2.a)//boom go home
+                        /*
+                        Step 1 - Move boom to position (1400) to avoid hitting parts on the robot
+                        Step 2 - Swing boom to center
+                        Step 3 - Lower boom to home position
+                         */
+                    {
+                        AutoButtonPressed ='a';
+                        if (yAxis.getCurrentPosition() <= 1405) {
+                            yAxis.setTargetPosition(1400); //Step 1
+                            yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                            yAxis.setPower(0.6);
+                        }
+                        yAxisMoveComplete = false;
+                        //Swing boom to home position - x Axis 0
+                        xDestinationPosition=0; //0 is home - Step 2
+                        xAxisMoveComplete=false;
+                        //Drop boom down to home position - y Axis 0 //Step 3
+                        BoomMoveComplete=false;
+                    }
+                    else if (gamepad2.x) //boom left
+                    {
+                        AutoButtonPressed ='x';
+                        //Set boom height to clear obsticles
+                        yAxis.setTargetPosition(1400);
+                        yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        yAxis.setPower(0.7);
+                        yAxisMoveComplete=false;
+                        //Swing boom to home position - x Axis 0
+                        xDestinationPosition=-2100; //0 is home
+                        xAxisMoveComplete=false;
+                    }
+                    else if (gamepad2.b)//boom right
+                    {
+                        AutoButtonPressed ='b';
+                        //Set boom height to clear obsticles
+                        yAxis.setTargetPosition(1400);
+                        yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        yAxis.setPower(0.7);
+                        yAxisMoveComplete=false;
+                        //Swing boom to home position - x Axis 0
+                        xDestinationPosition=2100; //0 is home
+                        xAxisMoveComplete=false;
+                    }
+                    else if (gamepad2.right_bumper)//boom right up
+                    {
+                        AutoButtonPressed ='r';
+                        //Set boom height to clear obsticles
+                        yAxis.setTargetPosition(2100);
+                        yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        yAxis.setPower(0.7);
+                        yAxisMoveComplete=false;
+                        //Swing boom to home position - x Axis 0
+                        xDestinationPosition=2100; //0 is home
+                        xAxisMoveComplete=false;
+                    }
+                    else if (gamepad2.left_bumper)//boom left up
+                    {
+                        AutoButtonPressed ='l';
+                        //Set boom height to clear obsticles
+                        yAxis.setTargetPosition(2100);
+                        yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        yAxis.setPower(0.7);
+                        yAxisMoveComplete=false;
+                        //Swing boom to home position - x Axis 0
+                        xDestinationPosition=-2100; //0 is home
+                        xAxisMoveComplete=false;
+                    }
+                    else if (gamepad2.y)// boom up for ducks
+                    {
+                        AutoButtonPressed = 'y';
+                        //set boom height to clear robot and be the right height for the duck spinner
+                        yAxis.setTargetPosition(1400);
+                        yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        yAxis.setPower(0.7);
+                        yAxisMoveComplete=false;
+                        xDestinationPosition=0; //0 is home
+                        xAxisMoveComplete=false;
+                    }
+
+                }
+                else {
+                    xAxis_power = 0;
                     yAxis_power = 0;
+                }
 
-                //boom presets
-                if (gamepad2.a || gamepad2.b || gamepad2.x)//Set motors to run using encoder
-                {
-                    xAxisMoveComplete = true;
-                    yAxisMoveComplete = true;
-                    BoomMoveComplete = true;
-                    BoomParkMoveRequest=false;
-                    xAxisEncoder = true;
-                    xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    yAxisEncoder = true;
-                    yAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                        if (gamepad2.a)//boom go home
-                        {
-                            //Set boom height to clear obsticles
-                            yAxis.setTargetPosition(1300);
-                            yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            yAxis.setPower(0.5);
-                            yAxisMoveComplete=false;
-                            //Swing boom to home position - x Axis 0
-                            xDestinationPosition=0; //0 is home
-                            xAxisMoveComplete=false;
-                            //Drop boom down to home position - y Axis 0
-                            BoomMoveComplete=false;
-                        }
-                        else if(gamepad2.x)//boom left
-                        {
-                            //Set boom height to clear obsticles
-                            yAxis.setTargetPosition(1300);
-                            yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            yAxis.setPower(0.5);
-                            yAxisMoveComplete=false;
-                            //Swing boom to home position - x Axis 0
-                            xDestinationPosition=-1100; //0 is home
-                            xAxisMoveComplete=false;
-                        }
-                        else if (gamepad2.b)//boom right
-                        {
-                            //Set boom height to clear obsticles
-                            yAxis.setTargetPosition(1300);
-                            yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            yAxis.setPower(0.5);
-                            yAxisMoveComplete=false;
-                            //Swing boom to home position - x Axis 0
-                            xDestinationPosition=1100; //0 is home
-                            xAxisMoveComplete=false;
 
-                }}
+                if (!AutoMode) //Only apply the motor powers if we're not in auto mode
+                {
+                    // dont forget to put back
+                    xAxis.setPower(xAxis_power);
+                    yAxis.setPower(-yAxis_power);
+                }
 
-                //Watch for Boom preset move operations
-                if (yAxisMoveComplete == false)
+                else if (AutoMode) //Execute on orders per Auto Mode
                 {
-                    if ((yAxis.getCurrentPosition() >= 1295) && (yAxis.getCurrentPosition() <= 1305))//Are we there yet??
-                    {
-                        yAxisMoveComplete=true;// Yes - yes we are there!
-                        yAxis.setPower(0); //Close enough, kill the power
-                        xAxis.setTargetPosition(xDestinationPosition);
-                        xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        xAxis.setPower(0.3);//Now to move the turret into position
-                }}
-                if ((yAxisMoveComplete == true) && (xAxisMoveComplete == false))
-                {
-                    if(((xDestinationPosition < 0) && (xDestinationPosition+1) >= (xAxis.getCurrentPosition()))
-                        || ((xDestinationPosition > 0 ) && (xDestinationPosition-1) <= (xAxis.getCurrentPosition()))
-                        || ((xDestinationPosition == 0 ) && ((xDestinationPosition) <= (xAxis.getCurrentPosition()) && ((xDestinationPosition+2) >= (xAxis.getCurrentPosition())))))
-                    {
-                        //if we've achieved our position, turn the xAxis motor off and reset to allow control from the controller
-                     xAxisMoveComplete = true;
-                     xAxis.setPower(0);
-                     xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                     xAxisEncoder = false;
+                    switch (AutoButtonPressed) {
+                        case 'a': //GO HOME
+                            //(yAxis.getCurrentPosition() >= 1395) &&
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1395))//Are we there yet??
+                            {
+                                yAxisMoveComplete=true;// Yes - yes we are there!
+                                yAxis.setPower(0); //Close enough, kill the power
+                                xAxis.setTargetPosition(xDestinationPosition); //Swing boom to center
+                                xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                xAxis.setPower(0.6);//Now to move the turret into position{
+                            }
+                            else if (!xAxisMoveComplete && xAxis.getCurrentPosition() <= 2 && xAxis.getCurrentPosition() >= -2)
+                            //Swing boom to home position - x Axis 0
+                            {
+                                //if we've achieved our position, turn the xAxis motor off and reset to allow control from the controller
+                                xAxisMoveComplete = true;
+                                xAxis.setPower(0);
+                                yAxis.setTargetPosition(0);
+                                yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                yAxis.setPower(0.3);
+                            }
+                            else if ((!BoomMoveComplete) && (yAxis.getCurrentPosition()<=4 || yAxisStop.getState()==true)) {
+                                //Drop boom down to home position - y Axis 0 //Step 3
+                                BoomMoveComplete=true;
+                                yAxis.setPower(0);
+                                AutoButtonPressed = 'p';
+                            }
+                            break;
+                        case 'x':
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1395) && (yAxis.getCurrentPosition() <= 1405))//Are we there yet??
+                            {
+                                yAxisMoveComplete=true;// Yes - yes we are there!
+                                yAxis.setPower(0); //Close enough, kill the power
+                                xAxis.setTargetPosition(xDestinationPosition); //Swing boom to center
+                                xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                xAxis.setPower(0.8);//Now to move the turret into position{
+                            }
+                            else if (!xAxisMoveComplete && xAxis.getCurrentPosition()<=-2095)
+                            {
+                                xAxis.setPower(0);
+                                xAxisMoveComplete=true;
+                                AutoButtonPressed='p';
+                            }
+                            break;
+                        case 'b':
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1395) && (yAxis.getCurrentPosition() <= 1405))//Are we there yet??
+                            {
+                                yAxisMoveComplete=true;// Yes - yes we are there!
+                                yAxis.setPower(0); //Close enough, kill the power
+                                xAxis.setTargetPosition(xDestinationPosition); //Swing boom to center
+                                xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                xAxis.setPower(0.8);//Now to move the turret into position{
+                            }
+                            else if (!xAxisMoveComplete && xAxis.getCurrentPosition()>=2095)
+                            {
+                                xAxis.setPower(0);
+                                xAxisMoveComplete=true;
+                                AutoButtonPressed='p';
+                            }
+                            break;
+
+                        case 'l':
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 2095) && (yAxis.getCurrentPosition() <= 2105)) //&& (yAxisTopStop.getState()==false))//Are we there yet??
+                            {
+                                yAxisMoveComplete=true;// Yes - yes we are there!
+                                yAxis.setPower(0); //Close enough, kill the power
+                                xAxis.setTargetPosition(xDestinationPosition); //Swing boom to center
+                                xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                xAxis.setPower(0.8);//Now to move the turret into position{
+                            }
+                            else if (!xAxisMoveComplete && xAxis.getCurrentPosition()<=-2095)
+                            {
+                                xAxis.setPower(0);
+                                xAxisMoveComplete=true;
+                                AutoButtonPressed='p';
+                            }
+                            break;
+                        case 'r':
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 2095) && (yAxis.getCurrentPosition() <= 2105)) //&& (yAxisTopStop.getState()==false))//Are we there yet??
+                            {
+                                yAxisMoveComplete=true;// Yes - yes we are there!
+                                yAxis.setPower(0); //Close enough, kill the power
+                                xAxis.setTargetPosition(xDestinationPosition); //Swing boom to center
+                                xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                                xAxis.setPower(0.8);//Now to move the turret into position{
+                            }
+                            else if (!xAxisMoveComplete && xAxis.getCurrentPosition()>=2095)
+                            {
+                                xAxis.setPower(0);
+                                xAxisMoveComplete=true;
+                                AutoButtonPressed='p';
+                            }
+                            break;
+                        case 'y':
+                            //
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1395) && (yAxis.getCurrentPosition() <= 1405))//Are we there yet??
+                           {
+                               yAxisMoveComplete=true;// Yes - yes we are there!
+                               yAxis.setPower(0); //Close enough, kill the power
+                               xAxis.setTargetPosition(xDestinationPosition); //Swing boom to center
+                               xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                               xAxis.setPower(0.5);//Now to move the turret into position{
+                           }
+                            else if (!xAxisMoveComplete && xAxis.getCurrentPosition() <= 2 && xAxis.getCurrentPosition() >= -2)
+                            //Swing boom to home position - x Axis 0
+                            {
+                                //if we've achieved our position, turn the xAxis motor off and reset to allow control from the controller
+                                xAxisMoveComplete = true;
+                                xAxis.setPower(0);
+                                AutoButtonPressed='p';
+                            }
+                            break;
+                        case 'p':
+                            AutoMode = true;
+                        default: //shouldn't ever happen
                     }
                 }
+//==================================================================================================================================
 
-                if((xAxisMoveComplete) && (yAxisMoveComplete) && (!BoomMoveComplete)) //Should we drop the boom into it's home position? Only if the destination is 0
-                {
-                    yAxis.setTargetPosition(0);
-                    yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    yAxis.setPower(0.3);
-                    BoomParkMoveRequest=true;
-                }
-                if ((yAxis.getCurrentPosition() <= 10) && (BoomParkMoveRequest))
-                {
-                    BoomMoveComplete = true;
-                    yAxisEncoder = false;
-                    xAxisEncoder = false;
-                    yAxis.setPower(0);
-                    yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    BoomParkMoveRequest=false;
-                }
                 //Intake and MAD DUCK SPINNER power
                 if(gamepad2.dpad_down)
                     Intake_power = -0.5;
@@ -382,11 +502,9 @@ public class FibbyTele22 extends OpMode {
                 // Motors aren't the same gear ratio, correction factor to left motors
                 LB_drive.setPower(LB_power);
                 LF_drive.setPower(LF_power);
-                //Don't apply manual power to the motors if we're trying to move them to preset positions with encoder
-if (xAxisEncoder==false)
-                    xAxis.setPower(xAxis_power);
-if (yAxisEncoder==false)
-                    yAxis.setPower(-yAxis_power);
+
+
+
 
                 Intake.setPower(Intake_power);
                 telemetry.addData("Encoders X Y LF LB", "%7d :%7d :%7d :%7d",

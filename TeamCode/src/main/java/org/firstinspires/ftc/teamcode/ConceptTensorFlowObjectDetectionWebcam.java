@@ -67,10 +67,10 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
    */
     private static final String TFOD_MODEL_ASSET = "FreightFrenzy_BCDM.tflite";
     private static final String[] LABELS = {
-      "Ball",
-      "Cube",
+      //"Ball",
+      //"Cube",
       "Duck",
-      "Marker"
+      //"Marker"
     };
 
     /*
@@ -119,8 +119,9 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
             // If your target is at distance greater than 50 cm (20") you can adjust the magnification value
             // to artificially zoom in to the center of image.  For best results, the "aspectRatio" argument
             // should be set to the value of the images used to create the TensorFlow Object Detection model
-            // (typically 16/9).
-            tfod.setZoom(2.5, 16.0/9.0);
+            // (typically 16/9). was 2.5
+            tfod.setZoom(1, 16.0/9.0);
+            tfod.setClippingMargins(400,100,0,100);
         }
 
         /** Wait for the game to begin */
@@ -129,6 +130,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
+
             while (opModeIsActive()) {
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
@@ -178,7 +180,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
             "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-       tfodParameters.minResultConfidence = 0.8f;
+       tfodParameters.minResultConfidence = 0.6f;
        tfodParameters.isModelTensorFlow2 = true;
        tfodParameters.inputSize = 320;
        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
