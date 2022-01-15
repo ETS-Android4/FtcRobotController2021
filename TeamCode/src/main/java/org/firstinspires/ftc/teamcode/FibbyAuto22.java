@@ -537,7 +537,7 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         }
         sleep(1500);
         Intake.setPower(1);
-        sleep(2000);
+        sleep(2400);
         Intake.setPower(0);
         if (Red_Alliance){
             MoveXAxisDeg(-1530,0.3,1000);
@@ -554,7 +554,7 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         sleep(2000);
         Intake.setPower(0);
         //move arms to clear
-        MoveXAxisDeg(-2,0.3,1000);
+        MoveXAxisDeg(0,0.3,1000);
         MoveYAxisDeg(2121,0.5,1000);
         //strafe away from the vision element so we dont get stuck
         SFdist(20,0.4,RightTurn,true,RightTurn,0,true);
@@ -644,10 +644,10 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //
 
-        xAxis.setTargetPosition(-40);
+        xAxis.setTargetPosition(-70);
         xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         xAxis.setPower(0.1);
-        while(xAxis.getCurrentPosition() >=-35)
+        while(xAxis.getCurrentPosition() >=-65)
         {}
         xAxis.setPower(0);
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

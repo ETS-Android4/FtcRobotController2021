@@ -66,8 +66,8 @@ public class FibbyTele22 extends OpMode {
         LF_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         RB_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LB_drive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       // yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         RF_drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -111,6 +111,11 @@ public class FibbyTele22 extends OpMode {
         LB_drive.setPower(0);
         RB_drive.setPower(0);
         xAxis.setPower(0);
+
+
+
+
+
         yAxis.setPower(0);
         Intake.setPower(0);
       //  DuckSpinner.setPower(0);
@@ -118,11 +123,11 @@ public class FibbyTele22 extends OpMode {
         Intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         yAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         yAxis.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       // yAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         yAxis.setDirection(DcMotor.Direction.FORWARD);
         xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         xAxis.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         xAxis.setDirection(DcMotor.Direction.FORWARD);
         // send telemetry message to indicate successful Encoder reset
         telemetry.addData("Path0", "Starting at %7d :%7d",
@@ -147,7 +152,7 @@ public class FibbyTele22 extends OpMode {
         xAxis.setPower(0);
         xDestinationPosition=0;
          */
-        xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
@@ -429,7 +434,7 @@ public class FibbyTele22 extends OpMode {
                             break;
 
                         case 'l':
-                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 2095) && (yAxis.getCurrentPosition() <= 2105)) //&& (yAxisTopStop.getState()==false))//Are we there yet??
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 2095) && (yAxis.getCurrentPosition() <= 2105) && (yAxisTopStop.getState()==false))//Are we there yet??
                             {
                                 yAxisMoveComplete=true;// Yes - yes we are there!
                                 yAxis.setPower(0); //Close enough, kill the power
@@ -445,7 +450,7 @@ public class FibbyTele22 extends OpMode {
                             }
                             break;
                         case 'r':
-                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 2095) && (yAxis.getCurrentPosition() <= 2105)) //&& (yAxisTopStop.getState()==false))//Are we there yet??
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 2095) && (yAxis.getCurrentPosition() <= 2105) && (yAxisTopStop.getState()==false))//Are we there yet??
                             {
                                 yAxisMoveComplete=true;// Yes - yes we are there!
                                 yAxis.setPower(0); //Close enough, kill the power
