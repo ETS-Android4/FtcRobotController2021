@@ -67,10 +67,10 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
    */
     private static final String TFOD_MODEL_ASSET = "FreightFrenzy_BCDM.tflite";
     private static final String[] LABELS = {
-      //"Ball",
-      //"Cube",
+      "Ball",
+      "Cube",
       "Duck",
-      //"Marker"
+      "Marker"
     };
 
     /*
@@ -121,7 +121,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
             // should be set to the value of the images used to create the TensorFlow Object Detection model
             // (typically 16/9). was 2.5
             tfod.setZoom(1, 16.0/9.0);
-            tfod.setClippingMargins(400,100,0,100);
+            tfod.setClippingMargins(0,0,0,0);
         }
 
         /** Wait for the game to begin */
@@ -146,6 +146,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
                                 recognition.getLeft(), recognition.getTop());
                         telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
                                 recognition.getRight(), recognition.getBottom());
+
                         i++;
                       }
                       telemetry.update();

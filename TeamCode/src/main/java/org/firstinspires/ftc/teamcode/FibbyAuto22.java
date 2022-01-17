@@ -32,6 +32,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import java.util.ArrayList;
 @Autonomous(name="FibbyAuto22", group="Autonomous22")
 public class FibbyAuto22 extends LinearOpMode {
+
+    //light controls
+    RevBlinkinLedDriver blinkinLedDriver;
+    RevBlinkinLedDriver.BlinkinPattern pattern;
+
     BNO055IMU imu;
     private DcMotor RF_drive = null;
     private DcMotor LF_drive = null;
@@ -611,6 +616,9 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         yAxis = hardwareMap.dcMotor.get("yAxis");
         Intake = hardwareMap.dcMotor.get("Intake");
 
+        // LED LIGHTS
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
+
         LeftDist = hardwareMap.get(DistanceSensor.class, "LeftDist");
 
         RightDist = hardwareMap.get(DistanceSensor.class, "RightDist");
@@ -661,10 +669,14 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
             if (gamepad1.b) {
                 Red_alliance = true;
                 QuestionAnswered = true;
+                pattern = RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED;
+                blinkinLedDriver.setPattern(pattern);
             }
             else if (gamepad1.x){
                 Red_alliance = false;
                 QuestionAnswered = true;
+                pattern = RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_BLUE;
+                blinkinLedDriver.setPattern(pattern);
             }
         }
 

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -11,12 +12,20 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Axis;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @TeleOp(name="FibbyTeleOp22", group="FibbyTeleOp22")
 public class FibbyTele22 extends OpMode {
+    //light controls
+    RevBlinkinLedDriver blinkinLedDriver;
+    RevBlinkinLedDriver.BlinkinPattern pattern;
+
     private DcMotor RF_drive = null;
     private DcMotor LF_drive = null;
     private DcMotor RB_drive = null;
@@ -29,6 +38,7 @@ public class FibbyTele22 extends OpMode {
     private DistanceSensor LeftDist;
     private DistanceSensor RightDist;
     private DistanceSensor BackDist;
+    private DistanceSensor IntakeDist;
 
     DigitalChannel xAxisStop;
     DigitalChannel yAxisStop;
@@ -47,6 +57,7 @@ public class FibbyTele22 extends OpMode {
     double timeleft;
     double drive = 0;
     double turn = 0;
+    double Duck_Power;
     private ElapsedTime runtime = new ElapsedTime();
     boolean IntakeOn=false;
     boolean xAxisEncoder = false;
@@ -56,8 +67,10 @@ public class FibbyTele22 extends OpMode {
     boolean BoomMoveComplete = true;
     boolean BoomParkMoveRequest = false;
     boolean AutoMode = false;
+    boolean IntakeFull = false;
     char AutoButtonPressed = 'o';
     int xDestinationPosition = 0;
+
 
 
     public void reset_encoders () {
@@ -88,6 +101,8 @@ public class FibbyTele22 extends OpMode {
         yAxis = hardwareMap.dcMotor.get("yAxis");
         Intake = hardwareMap.dcMotor.get("Intake");
 
+        // LED LIGHTS
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
 
         xAxisStop = hardwareMap.get(DigitalChannel.class, "xAxisStop");
         xAxisStop.setMode(DigitalChannel.Mode.INPUT);
@@ -103,8 +118,8 @@ public class FibbyTele22 extends OpMode {
         FrontDist = hardwareMap.get(DistanceSensor.class, "FrontDist");
 
         BackDist = hardwareMap.get(DistanceSensor.class, "BackDist");
-      //  DuckSpinner = hardwareMap.dcMotor.get("DuckSpinner");
-      //  base = hardwareMap.servo.get("base");
+
+        IntakeDist = hardwareMap.get(DistanceSensor.class, "IntakeDist");
 
         LF_drive.setPower(0);
         RF_drive.setPower(0);
@@ -155,10 +170,15 @@ public class FibbyTele22 extends OpMode {
         //xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         xAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         yAxis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        timeleft = 120;
+        // ready to go just hit start
+        pattern = RevBlinkinLedDriver.BlinkinPattern.SHOT_RED;
+        blinkinLedDriver.setPattern(pattern);
     }
         public void start () {
             runtime.reset();
         }
+
             public void loop () {
             timeleft = 120 - runtime.seconds();
             if (gamepad1.right_stick_y != 0) {
@@ -492,12 +512,28 @@ public class FibbyTele22 extends OpMode {
 //==================================================================================================================================
 
                 //Intake and MAD DUCK SPINNER power
-                if(gamepad2.dpad_down)
+                //reseting the power if the button isnt pressed
+                if (Duck_Power > 0.1 && !gamepad2.dpad_right)
+                    Duck_Power = 0.3;
+                //duck spinner with ramp up
+                if (gamepad2.dpad_right) {
+                    if (Duck_Power < 1) {
+                        Duck_Power = Duck_Power + 0.1
+
+                        ;
+                        Intake_power = Duck_Power;
+                    }
+                }
+                     // shooting out blocks
+                else if(gamepad2.dpad_down)
                     Intake_power = -0.5;
+                // shooting ball out
                 else if(gamepad2.dpad_left)
                     Intake_power = -0.75;
+                //grabing blocks and balls
                 else if (gamepad2.dpad_up)
                     Intake_power = 1;
+                //nothing
                 else
                     Intake_power = 0;
                 
@@ -517,9 +553,71 @@ public class FibbyTele22 extends OpMode {
                         yAxis.getCurrentPosition(),
                         RB_drive.getCurrentPosition(),
                         LB_drive.getCurrentPosition());
-
-
+                telemetry.addLine() .addData("IntakeDist", "%.3f",
+                IntakeDist.getDistance(DistanceUnit.INCH));
                 telemetry.update();
+//light logic
+                //Do we have a block?
+                if (IntakeDist.getDistance(DistanceUnit.INCH) <= 3)
+                {
+                    //YES WE DO WOWOWOWOWO ALERT THE WORLD
+                    IntakeFull = true;
+                }
+                //no :,(
+                else IntakeFull =false;
+
+                // is it telliop time?
+                if (timeleft >= 45) {
+                    // YES BLUE BLUE BLUE
+                    //do we have a block?
+                    if (!IntakeFull)
+                    {
+                        //no but the colors are pretty
+                        pattern = RevBlinkinLedDriver.BlinkinPattern.CP1_2_COLOR_WAVES;
+                        blinkinLedDriver.setPattern(pattern);
+                    }
+                    if (IntakeFull)
+                    {
+                        //YES ALERT EVERYONE AAAAA
+                        pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_BLUE;
+                        blinkinLedDriver.setPattern(pattern);
+                    }
+                }
+                //is it endgame?
+                if (timeleft <= 30) {
+                    //yes RED ALERT ITS DUCK TIME BOIS GOGOGOGOGOGO
+                    //do we have a block?
+                    if (!IntakeFull)
+                    {
+                        //nope that's ok I guess
+                        pattern = RevBlinkinLedDriver.BlinkinPattern.RED;
+                        blinkinLedDriver.setPattern(pattern);
+                    }
+                    if (IntakeFull)
+                    {
+                        //YES HAHAHHA LETS GOOOOO
+                        pattern = RevBlinkinLedDriver.BlinkinPattern.STROBE_RED;
+                        blinkinLedDriver.setPattern(pattern);
+                    }
+                }
+                // 15 second End Game warning lights
+                // is it 15 sec to endgame?
+                else if (timeleft <= 45) {
+                    //YES YELLOW ALERT
+                    //do we have a block?
+                    if (!IntakeFull) {
+                        // no dang man get it together
+                        pattern = RevBlinkinLedDriver.BlinkinPattern.YELLOW;
+                        blinkinLedDriver.setPattern(pattern);
+                    }
+                    else if(IntakeFull) {
+                        // YES BLIND THEM AND GO
+                        pattern = RevBlinkinLedDriver.BlinkinPattern.CP2_STROBE;
+                        blinkinLedDriver.setPattern(pattern);
+                    }
+                }
+
+
         }
         
             public void stop() {
