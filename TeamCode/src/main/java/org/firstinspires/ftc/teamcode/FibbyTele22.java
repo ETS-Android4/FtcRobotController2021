@@ -153,7 +153,10 @@ public class FibbyTele22 extends OpMode {
         telemetry.update();
         timeleft = 120;
         // Put boom home and reset encoders
-
+        if (yAxisStop.getState()==false) {
+            pattern = RevBlinkinLedDriver.BlinkinPattern.SHOT_WHITE;
+            blinkinLedDriver.setPattern(pattern);
+        }
         /*if (yAxisStop.getState()==true) //Is the arm all the way down on the limit switch?
         while (xAxisStop.getState()== false)  xAxis.setPower(0.2);//Move the arm right until the limit switch is triggered
         xAxis.setPower(0);
@@ -322,7 +325,7 @@ public class FibbyTele22 extends OpMode {
                         //Set boom height to clear obsticles
                         yAxis.setTargetPosition(1400);
                         yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        yAxis.setPower(0.7);
+                        yAxis.setPower(0.8);
                         yAxisMoveComplete=false;
                         //Swing boom to home position - x Axis 0
                         xDestinationPosition=-2100; //0 is home
@@ -334,7 +337,7 @@ public class FibbyTele22 extends OpMode {
                         //Set boom height to clear obsticles
                         yAxis.setTargetPosition(1400);
                         yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        yAxis.setPower(0.7);
+                        yAxis.setPower(0.8);
                         yAxisMoveComplete=false;
                         //Swing boom to home position - x Axis 0
                         xDestinationPosition=2100; //0 is home
@@ -346,7 +349,7 @@ public class FibbyTele22 extends OpMode {
                         //Set boom height to clear obsticles
                         yAxis.setTargetPosition(2100);
                         yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        yAxis.setPower(0.7);
+                        yAxis.setPower(0.8);
                         yAxisMoveComplete=false;
                         //Swing boom to home position - x Axis 0
                         xDestinationPosition=2100; //0 is home
@@ -358,7 +361,7 @@ public class FibbyTele22 extends OpMode {
                         //Set boom height to clear obsticles
                         yAxis.setTargetPosition(2100);
                         yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        yAxis.setPower(0.7);
+                        yAxis.setPower(0.8);
                         yAxisMoveComplete=false;
                         //Swing boom to home position - x Axis 0
                         xDestinationPosition=-2100; //0 is home
@@ -370,7 +373,7 @@ public class FibbyTele22 extends OpMode {
                         //set boom height to clear robot and be the right height for the duck spinner
                         yAxis.setTargetPosition(1400);
                         yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        yAxis.setPower(0.7);
+                        yAxis.setPower(0.8);
                         yAxisMoveComplete=false;
                         xDestinationPosition=0; //0 is home
                         xAxisMoveComplete=false;
@@ -401,7 +404,7 @@ public class FibbyTele22 extends OpMode {
                                 yAxis.setPower(0); //Close enough, kill the power
                                 xAxis.setTargetPosition(xDestinationPosition); //Swing boom to center
                                 xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                xAxis.setPower(0.6);//Now to move the turret into position{
+                                xAxis.setPower(0.8);//Now to move the turret into position{
                             }
                             else if (!xAxisMoveComplete && xAxis.getCurrentPosition() <= 2 && xAxis.getCurrentPosition() >= -2)
                             //Swing boom to home position - x Axis 0
@@ -411,17 +414,25 @@ public class FibbyTele22 extends OpMode {
                                 xAxis.setPower(0);
                                 yAxis.setTargetPosition(0);
                                 yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                yAxis.setPower(0.3);
+                                yAxis.setPower(0.7);//Drop boom down to home position - y Axis 0 //Step 3
+                            }
+                            else if ((!xAxisMoveComplete) && (!BoomMoveComplete) && (yAxisMoveComplete) && (xAxis.getCurrentPosition() <= 600) && (xAxis.getCurrentPosition() >= -600))
+                            {
+                                xAxis.setPower(0.3);
+                            }
+                            else if ((!BoomMoveComplete) && yAxis.getCurrentPosition()>200 && yAxis.getCurrentPosition()<=500
+                                    && yAxisStop.getState()==false && yAxisMoveComplete && xAxisMoveComplete){
+                                yAxis.setPower(yAxis.getCurrentPosition()*0.001);
                             }
                             else if ((!BoomMoveComplete) && (yAxis.getCurrentPosition()<=4 || yAxisStop.getState()==true)) {
-                                //Drop boom down to home position - y Axis 0 //Step 3
+                                //Boom has reached it's destination, kill power and mark the move as complete.
                                 BoomMoveComplete=true;
                                 yAxis.setPower(0);
                                 AutoButtonPressed = 'p';
                             }
                             break;
                         case 'x':
-                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1395) && (yAxis.getCurrentPosition() <= 1405))//Are we there yet??
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1395) && (yAxis.getCurrentPosition() <= 1420))//Are we there yet??
                             {
                                 yAxisMoveComplete=true;// Yes - yes we are there!
                                 yAxis.setPower(0); //Close enough, kill the power
@@ -429,6 +440,8 @@ public class FibbyTele22 extends OpMode {
                                 xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                 xAxis.setPower(0.8);//Now to move the turret into position{
                             }
+                            else if ((!yAxisMoveComplete) && (!xAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1000))
+                                yAxis.setPower(0.3);
                             else if (!xAxisMoveComplete && xAxis.getCurrentPosition()<=-2095)
                             {
                                 xAxis.setPower(0);
@@ -437,7 +450,7 @@ public class FibbyTele22 extends OpMode {
                             }
                             break;
                         case 'b':
-                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1395) && (yAxis.getCurrentPosition() <= 1405))//Are we there yet??
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1395) && (yAxis.getCurrentPosition() <= 1420))//Are we there yet??
                             {
                                 yAxisMoveComplete=true;// Yes - yes we are there!
                                 yAxis.setPower(0); //Close enough, kill the power
@@ -445,6 +458,8 @@ public class FibbyTele22 extends OpMode {
                                 xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                 xAxis.setPower(0.8);//Now to move the turret into position{
                             }
+                            else if ((!yAxisMoveComplete) && (!xAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1000))
+                                yAxis.setPower(0.3);
                             else if (!xAxisMoveComplete && xAxis.getCurrentPosition()>=2095)
                             {
                                 xAxis.setPower(0);
@@ -454,7 +469,7 @@ public class FibbyTele22 extends OpMode {
                             break;
 
                         case 'l':
-                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 2095) && (yAxis.getCurrentPosition() <= 2105) && (yAxisTopStop.getState()==false))//Are we there yet??
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 2085) && (yAxis.getCurrentPosition() <= 2115) && (yAxisTopStop.getState()==false))//Are we there yet??
                             {
                                 yAxisMoveComplete=true;// Yes - yes we are there!
                                 yAxis.setPower(0); //Close enough, kill the power
@@ -462,6 +477,8 @@ public class FibbyTele22 extends OpMode {
                                 xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                 xAxis.setPower(0.8);//Now to move the turret into position{
                             }
+                            else if ((!yAxisMoveComplete) && (!xAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1700))
+                                yAxis.setPower(0.3);
                             else if (!xAxisMoveComplete && xAxis.getCurrentPosition()<=-2095)
                             {
                                 xAxis.setPower(0);
@@ -470,7 +487,7 @@ public class FibbyTele22 extends OpMode {
                             }
                             break;
                         case 'r':
-                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 2095) && (yAxis.getCurrentPosition() <= 2105) && (yAxisTopStop.getState()==false))//Are we there yet??
+                            if ((!yAxisMoveComplete) && (yAxis.getCurrentPosition() >= 2085) && (yAxis.getCurrentPosition() <= 2115) && (yAxisTopStop.getState()==false))//Are we there yet??
                             {
                                 yAxisMoveComplete=true;// Yes - yes we are there!
                                 yAxis.setPower(0); //Close enough, kill the power
@@ -478,6 +495,8 @@ public class FibbyTele22 extends OpMode {
                                 xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                                 xAxis.setPower(0.8);//Now to move the turret into position{
                             }
+                            else if ((!yAxisMoveComplete) && (!xAxisMoveComplete) && (yAxis.getCurrentPosition() >= 1700))
+                                yAxis.setPower(0.3);
                             else if (!xAxisMoveComplete && xAxis.getCurrentPosition()>=2095)
                             {
                                 xAxis.setPower(0);
@@ -493,7 +512,7 @@ public class FibbyTele22 extends OpMode {
                                yAxis.setPower(0); //Close enough, kill the power
                                xAxis.setTargetPosition(xDestinationPosition); //Swing boom to center
                                xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                               xAxis.setPower(0.5);//Now to move the turret into position{
+                               xAxis.setPower(0.7);//Now to move the turret into position{
                            }
                             else if (!xAxisMoveComplete && xAxis.getCurrentPosition() <= 2 && xAxis.getCurrentPosition() >= -2)
                             //Swing boom to home position - x Axis 0

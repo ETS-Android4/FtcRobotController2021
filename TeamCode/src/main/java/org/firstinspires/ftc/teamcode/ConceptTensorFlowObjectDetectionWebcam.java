@@ -67,10 +67,10 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
    */
     private static final String TFOD_MODEL_ASSET = "FreightFrenzy_BCDM.tflite";
     private static final String[] LABELS = {
-      "Ball",
+      //"Ball",
       "Cube",
       "Duck",
-      "Marker"
+      //"Marker"
     };
 
     /*
@@ -121,7 +121,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
             // should be set to the value of the images used to create the TensorFlow Object Detection model
             // (typically 16/9). was 2.5
             tfod.setZoom(1, 16.0/9.0);
-            tfod.setClippingMargins(0,0,0,0);
+            tfod.setClippingMargins(0,100,0,0);
         }
 
         /** Wait for the game to begin */
@@ -181,7 +181,7 @@ public class ConceptTensorFlowObjectDetectionWebcam extends LinearOpMode {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
             "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-       tfodParameters.minResultConfidence = 0.6f;
+       tfodParameters.minResultConfidence = 0.7f;
        tfodParameters.isModelTensorFlow2 = true;
        tfodParameters.inputSize = 320;
        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);

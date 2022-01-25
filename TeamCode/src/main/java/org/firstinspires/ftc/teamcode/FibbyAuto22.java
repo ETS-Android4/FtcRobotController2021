@@ -17,6 +17,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -26,10 +28,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 
 import java.util.ArrayList;
+import java.util.List;
+
 @Autonomous(name="FibbyAuto22", group="Autonomous22")
 public class FibbyAuto22 extends LinearOpMode {
 
@@ -70,16 +77,33 @@ public class FibbyAuto22 extends LinearOpMode {
     double rampmotorpower;
     boolean QuestionAnswered = false;
     boolean RunningToTheShop = false;
+    boolean RunningToTheShopCam = false;
     boolean MadDuckPoints = false;
-    boolean MadDuckPointsRed = false;
+    boolean MadDuckPointsCam = false;
     boolean RightTurn = false;
     boolean LeftTurn = false;
+    float ElementCoordinates = 0;
+    int ElementPosition = 0;
 
     double dst_heading;
     public ArrayList allTrackables;
     // State used for updating telemetry
     Orientation angles;
     Acceleration gravity;
+
+    private static final String TFOD_MODEL_ASSET = "FreightFrenzy_BCDM.tflite";
+    private static final String[] LABELS = {
+           // "Ball",
+            "Cube",
+            "Duck",
+           // "Marker"
+    };
+
+    private static final String VUFORIA_KEY =
+            "Ae6MFyH/////AAABmf06rZVcN0VqtDgoLd1KtAcowILYnLgT+SXkGwocAFEpSEmZiGI51vbPAL/QfAgSIhIpPrAK3Fl+vReEgcd1kU5az1pYTI01VqIV1+3ELPbCEcnNMdw3Rs7L8tMMsyfY2nebMlSFfgn6rkfJnnoQEnr4gCGHB1K/7VVZsFg7AlG4SPJ1bORRlhkFf0xIP28Tvr80YnC06hnsL2AQgOJtGrPv7HUO04hWxe9jLMdwHhmnBu/FZfovI9A6EjrzB72joGNTzuLA5R2bBGKW6AsrkKcgw1y50EFOqanZ19gWBX7bc1OExeaNeNIMaGzbMV8jwVahVndqS4EiLc9FuudY21tw4b4jupvhSYUiSGBMtLmh\";\n";
+
+    private VuforiaLocalizer vuforia;
+    private TFObjectDetector tfod;
 
     //-------------------------------------------------------------------------------------------------
     public void GyroDriveBase(boolean RampUp, int Course, double motorpower, boolean strafe, boolean right) {
@@ -200,6 +224,8 @@ public class FibbyAuto22 extends LinearOpMode {
                     GyroDriveBase(RampUp, Course, motorpower, false, false);
                 }
             } else {
+
+
 
                 // Leave motors powered until we close the distance to less than we passed in
                 while ((FrontDist.getDistance(DistanceUnit.INCH) < distance) && (opModeIsActive())) {
@@ -575,7 +601,7 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
 
     }
 
-    public void MadDuckPointsRed (boolean Red_Alliance) {
+    public void MadDuckPointsCam (boolean Red_Alliance) {
         //if red
         boolean RightTurn = true;
         boolean LeftTurn = false;
@@ -584,8 +610,114 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
             RightTurn = false;
             LeftTurn = true;
         }
-
+if (!Red_Alliance && ElementPosition == 1)
+{ElementPosition = 3;}
+else if (!Red_Alliance && ElementPosition == 2)
+{ElementPosition = 1;}
+else if (!Red_Alliance && ElementPosition == 3)
+{ElementPosition = 2;}
+else
+{}
+    if (ElementPosition == 1)
+    {
+        if (Red_Alliance)
+        drivedist(22, 0.3, 10000, false, 0, true);
+        // move forward
+        if (!Red_Alliance)
+        drivedist(30, 0.6, 10000, false, 0, true);
+        // lift arm to bottom hub
+        MoveYAxisDeg(800, 0.5, 1000);
+        if (!Red_Alliance)
+        drivedist(28, 0.3, 10000, false, 0, true);
+        // turn towards hub 45 degrees
+        SpinGyro(-50, 0.5, 10000, RightTurn, false);
+        drivedeg(200, 0.4, 1000, true, 45, true);
+        // shoots block into hub
+        Intake.setPower(-1);
+        sleep(1000);
+        Intake.setPower(0);
+        drivedeg(-200, -0.4, 1000, true, 45, true);
+        SpinGyro(0, 0.4, 10000, LeftTurn, false);
+        drivedist(10, 0.4, 10000, false, 0, true);
+        MoveYAxisDeg(1400, 0.5, 1000);
+        sleep(1100);
     }
+    else if (ElementPosition == 2)
+    {
+        // move forward
+        drivedist(30, 0.5, 10000, false, 0, true);
+        // lift arm to middle hub
+        MoveYAxisDeg(1200, 0.5, 1000);
+        // sleep
+        sleep(1500);
+        // turn arm 45 degrees
+        if (Red_Alliance) {
+            MoveXAxisDeg(1630, .5, 1000);
+        } else if (!Red_Alliance) {
+            MoveXAxisDeg(-1630, .5, 1000);
+        }
+
+        // sleep
+        sleep(1500);
+        // shoots block into hub
+        Intake.setPower(-1);
+        sleep(1500);
+        Intake.setPower(0);
+        MoveXAxisDeg(0, 0.5, 1000);
+        sleep(1100);
+        MoveYAxisDeg(1400, 0.5, 1000);
+        sleep(1100);
+        drivedist(10, 0.4, 10000, false, 0, true);
+    }
+    else if (ElementPosition == 3)
+    {
+        // move forward
+        drivedist(30, 0.5, 10000, false, 0, true);
+        // lift arm to middle hub
+        MoveYAxisDeg(2100, 0.5, 1000);
+        // sleep
+        sleep(1500);
+        // turn arm 45 degrees
+        if (Red_Alliance) {
+            MoveXAxisDeg(1630, .5, 1000);
+        } else if (!Red_Alliance) {
+            MoveXAxisDeg(-1630, .5, 1000);
+        }
+        // sleep
+        sleep(1500);
+        // shoots block into hub
+        Intake.setPower(-1);
+        sleep(1500);
+        Intake.setPower(0);
+        MoveXAxisDeg(0, 0.5, 1000);
+        sleep(1300);
+        MoveYAxisDeg(1400, 0.5, 1000);
+        sleep(1100);
+        drivedist(10, 0.4, 10000, false, 0, true);
+    }
+
+    SpinGyro(90, 0.3, 1000, RightTurn, true);
+    drivedist(3, 0.3, 10000, false, 90, true);
+    SFdist(7, 0.4, RightTurn, true, RightTurn, 90, true);
+    Intake.setPower(0.75);
+    sleep(3000);
+    Intake.setPower(0);
+    SFdist(30, 0.4, RightTurn, true, LeftTurn, 90, true);
+    drivedist(2, 0.4, 10000, false, 90, true);
+}
+
+    public void RunningToTheShopCam (boolean Red_Alliance) {
+
+        boolean RightTurn = true;
+        boolean LeftTurn = false;
+        if (!Red_alliance) {
+            RightTurn = false;
+            LeftTurn = true;
+        }
+        SpinGyro(90,0.2,2000,true,true);
+    }
+
+
 //--------------------------------------------------------------------------------------------------------------------------------
     private void checkOrientation() {
 // read the orientation of the robot
@@ -593,6 +725,32 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         this.imu.getPosition();
 // and save the heading
         heading = angles.firstAngle;
+    }
+    //------------------------------------------------------------------------------------------------------------------------------
+    private void initVuforia() {
+        /*
+         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
+         */
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+
+        //  Instantiate the Vuforia engine
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+        // Loading trackables is not necessary for the TensorFlow Object Detection engine.
+    }
+    //------------------------------------------------------------------------------------------------------------------------------
+    private void initTfod() {
+        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfodParameters.minResultConfidence = 0.7f;
+        tfodParameters.isModelTensorFlow2 = true;
+        tfodParameters.inputSize = 320;
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
     }
     //------------------------------------------------------------------------------------------------------------------------------
     public void runOpMode() {
@@ -607,6 +765,36 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(gyro_parameters);
 
+        initVuforia();
+        initTfod();
+
+        if (tfod != null) {
+            tfod.activate();
+            tfod.setZoom(1, 16.0/9.0);
+            tfod.setClippingMargins(0,100,0,0);
+        }
+
+       /* if (tfod != null) {
+            // getUpdatedRecognitions() will return null if no new information is available since
+            // the last time that call was made.
+            List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+            if (updatedRecognitions != null) {
+                telemetry.addData("# Object Detected", updatedRecognitions.size());
+                // step through the list of recognitions and display boundary info.
+                int i = 0;
+                for (Recognition recognition : updatedRecognitions) {
+                    telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                    telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
+                            recognition.getLeft(), recognition.getTop());
+                    telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
+                            recognition.getRight(), recognition.getBottom());
+
+                    i++;
+                }
+                telemetry.update();
+            }
+        }
+*/
         //Mapping motor to variable names
         RF_drive = hardwareMap.dcMotor.get("RF_drive");
         LF_drive = hardwareMap.dcMotor.get("LF_drive");
@@ -681,7 +869,7 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         }
 
         QuestionAnswered = false;
-        telemetry.addLine("Y for RunningToTheShop - A for MadDuckPoints - X for MadDuckPointsRed - B for ");
+        telemetry.addLine("Y for RunningToTheShop - A for MadDuckPoints - X for MadDuckPointsCam - B for RunningToTheShopCam");
         telemetry.update();
         sleep (1000);
         while (QuestionAnswered == false) {
@@ -699,16 +887,67 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
             }
             if (gamepad1.x) {
                 //MadDuckPointsRed
-                telemetry.addLine("SomethingNew");
-                MadDuckPointsRed = true;
+                telemetry.addLine("MadDuckPointsCam");
+                MadDuckPointsCam = true;
+                QuestionAnswered = true;
+            }
+            if (gamepad1.b) {
+                //RunningToTheShop
+                telemetry.addLine("RunningToTheShopCam");
+                RunningToTheShopCam = true;
                 QuestionAnswered = true;
             }
             telemetry.update();
         }
 
         while (!isStarted()) {
+            if (tfod != null) {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                if (updatedRecognitions != null) {
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+
+                    // step through the list of recognitions and display boundary info.
+                    int i = 0;
+                    for (Recognition recognition : updatedRecognitions) {
+                        telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                        telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
+                                recognition.getLeft(), recognition.getTop());
+                        ElementCoordinates = recognition.getLeft();
+                        telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
+                                recognition.getRight(), recognition.getBottom());
+
+                        i++;
+                    }
+                    telemetry.update();
+                    if (i==0)
+                        ElementCoordinates=0;
+                }
+            }
 
         }
+        tfod.deactivate();//turn off camera
+        if (ElementCoordinates > 275)
+            ElementPosition = 3;
+        else if (ElementCoordinates <=275 && ElementCoordinates > 0)
+            ElementPosition = 2;
+        else
+            ElementPosition =1;
+
+       switch (ElementPosition){
+           case 1:{pattern = RevBlinkinLedDriver.BlinkinPattern.CP1_2_TWINKLES;
+               blinkinLedDriver.setPattern(pattern); }
+               break;
+           case 2:{pattern = RevBlinkinLedDriver.BlinkinPattern.RAINBOW_WITH_GLITTER;
+               blinkinLedDriver.setPattern(pattern);}
+               break;
+           case 3:{pattern = RevBlinkinLedDriver.BlinkinPattern.VIOLET;
+               blinkinLedDriver.setPattern(pattern);}
+               break;
+       }
+       // sleep(5000);
+
 
         if (RunningToTheShop)
         {
@@ -717,9 +956,13 @@ private void MoveXAxisDeg (int deg, double motorPower,int time) {
         else if (MadDuckPoints){
             MadDuckPoints(Red_alliance);
         }
-        else if (MadDuckPointsRed){
-            MadDuckPointsRed(Red_alliance);
+        else if (MadDuckPointsCam){
+            MadDuckPointsCam(Red_alliance);
         }
+        else if (RunningToTheShopCam){
+            RunningToTheShopCam(Red_alliance);
+        }
+
         //turn off motors
         resetmotors();
     }
