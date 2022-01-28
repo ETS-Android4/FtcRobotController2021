@@ -49,6 +49,7 @@ public class SensorDistAll extends LinearOpMode {
     private DistanceSensor RightDist;
     private DistanceSensor FrontDist;
     private DistanceSensor BackDist;
+    private DistanceSensor IntakeDist;
     @Override
     public void runOpMode() {
         // you can use this as a regular DistanceSensor.
@@ -56,6 +57,7 @@ public class SensorDistAll extends LinearOpMode {
         RightDist = hardwareMap.get(DistanceSensor.class, "RightDist");
         FrontDist = hardwareMap.get(DistanceSensor.class, "FrontDist");
         BackDist = hardwareMap.get(DistanceSensor.class, "BackDist");
+        IntakeDist = hardwareMap.get(DistanceSensor.class, "IntakeDist");
         telemetry.addData(">>", "Press start to continue");
         telemetry.update();
 
@@ -72,6 +74,7 @@ public class SensorDistAll extends LinearOpMode {
             telemetry.addData("Left (IN)", String.format("%.01f in", LeftDist.getDistance(DistanceUnit.INCH)));
             telemetry.addData("Right (IN)", String.format("%.01f in", RightDist.getDistance(DistanceUnit.INCH)));
             telemetry.addData("Back (IN)", String.format("%.01f in", BackDist.getDistance(DistanceUnit.INCH)));
+            telemetry.addData("Intake (IN)", String.format("%.01f in", IntakeDist.getDistance(DistanceUnit.INCH)));
             // Rev2mDistanceSensor specific methods.
           /*  telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
             telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));

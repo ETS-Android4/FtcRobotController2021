@@ -282,10 +282,13 @@ public class FibbyTele22 extends OpMode {
 
                 else if (gamepad2.a || gamepad2.b || gamepad2.x || gamepad2.y|| gamepad2.right_bumper||gamepad2.left_bumper)
                 {
-                    if ((AutoButtonPressed == 'a' && gamepad2.a) || (AutoButtonPressed == 'b' && gamepad2.b) || (AutoButtonPressed == 'x' && gamepad2.x) || (AutoButtonPressed == 'y' && gamepad2.y)|| (AutoButtonPressed == 'r' && gamepad2.right_bumper)||(AutoButtonPressed == 'l' && gamepad2.left_bumper))
+                    if ((AutoButtonPressed == 'a' && gamepad2.a) || (AutoButtonPressed == 'b' && gamepad2.b) || (AutoButtonPressed == 'x' && gamepad2.x) ||
+                            (AutoButtonPressed == 'y' && gamepad2.y)|| (AutoButtonPressed == 'r' && gamepad2.right_bumper)||(AutoButtonPressed == 'l' && gamepad2.left_bumper))
                     {} //We're using this if statement to prevent resetting the encoders and booleans multiple times when the bottom is held past the first loop through this code
                     //By doing this, we're preventing repeatedly resetting and causing false starts/stops. The interrupt functionality still works though.
-                    else if (!AutoMode || AutoButtonPressed == 'a' || AutoButtonPressed == 'b' || AutoButtonPressed == 'x' || AutoButtonPressed == 'y'|| AutoButtonPressed == 'l'|| AutoButtonPressed == 'r') //We are looking for the AutoButtonPressed variable as a b or x to look for the buttom being pressed multiple times
+                    else if (!AutoMode || AutoButtonPressed == 'a' || AutoButtonPressed == 'b' || AutoButtonPressed == 'x' || AutoButtonPressed == 'y'||
+                            AutoButtonPressed == 'l'|| AutoButtonPressed == 'r')
+                        //We are looking for the AutoButtonPressed variable as a b or x to look for the buttom being pressed multiple times
                     {
                         yAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                         xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -310,7 +313,7 @@ public class FibbyTele22 extends OpMode {
                         if (yAxis.getCurrentPosition() <= 1405) {
                             yAxis.setTargetPosition(1400); //Step 1
                             yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                            yAxis.setPower(0.6);
+                            yAxis.setPower(0.8);
                         }
                         yAxisMoveComplete = false;
                         //Swing boom to home position - x Axis 0
@@ -404,17 +407,19 @@ public class FibbyTele22 extends OpMode {
                                 yAxis.setPower(0); //Close enough, kill the power
                                 xAxis.setTargetPosition(xDestinationPosition); //Swing boom to center
                                 xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                xAxis.setPower(0.8);//Now to move the turret into position{
+                                xAxis.setPower(1);//Now to move the turret into position was 0.8{
                             }
-                            else if (!xAxisMoveComplete && xAxis.getCurrentPosition() <= 2 && xAxis.getCurrentPosition() >= -2)
+                            else if (!xAxisMoveComplete && xAxis.getCurrentPosition() <= 10 && xAxis.getCurrentPosition() >= -10
+
+                            )
                             //Swing boom to home position - x Axis 0
                             {
                                 //if we've achieved our position, turn the xAxis motor off and reset to allow control from the controller
                                 xAxisMoveComplete = true;
-                                xAxis.setPower(0);
+                                //xAxis.setPower(0);
                                 yAxis.setTargetPosition(0);
                                 yAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                                yAxis.setPower(0.7);//Drop boom down to home position - y Axis 0 //Step 3
+                                yAxis.setPower(1);//Drop boom down to home position - y Axis 0 //Step 3
                             }
                             else if ((!xAxisMoveComplete) && (!BoomMoveComplete) && (yAxisMoveComplete) && (xAxis.getCurrentPosition() <= 600) && (xAxis.getCurrentPosition() >= -600))
                             {
@@ -427,6 +432,7 @@ public class FibbyTele22 extends OpMode {
                             else if ((!BoomMoveComplete) && (yAxis.getCurrentPosition()<=4 || yAxisStop.getState()==true)) {
                                 //Boom has reached it's destination, kill power and mark the move as complete.
                                 BoomMoveComplete=true;
+                                xAxis.setPower(0);
                                 yAxis.setPower(0);
                                 AutoButtonPressed = 'p';
                             }

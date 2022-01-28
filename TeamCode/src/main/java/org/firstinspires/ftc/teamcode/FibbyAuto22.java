@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -57,6 +58,11 @@ public class FibbyAuto22 extends LinearOpMode {
     private DistanceSensor LeftDist;
     private DistanceSensor RightDist;
     private DistanceSensor BackDist;
+    private DistanceSensor IntakeDist;
+
+    private ElapsedTime runtime = new ElapsedTime();
+    double timeleft;
+
 
     DigitalChannel xAxisStop;
     DigitalChannel yAxisStop;
@@ -623,14 +629,14 @@ else
         if (Red_Alliance)
         drivedist(22, 0.3, 10000, false, 0, true);
         // move forward
-        if (!Red_Alliance)
-        drivedist(30, 0.6, 10000, false, 0, true);
+        //if (!Red_Alliance)
+        //drivedist(30, 0.6, 10000, false, 0, true);
         // lift arm to bottom hub
         MoveYAxisDeg(800, 0.5, 1000);
         if (!Red_Alliance)
         drivedist(28, 0.3, 10000, false, 0, true);
         // turn towards hub 45 degrees
-        SpinGyro(-50, 0.5, 10000, RightTurn, false);
+        SpinGyro(-52, 0.5, 10000, RightTurn, false);
         drivedeg(200, 0.4, 1000, true, 45, true);
         // shoots block into hub
         Intake.setPower(-1);
@@ -702,8 +708,8 @@ else
     Intake.setPower(0.75);
     sleep(3000);
     Intake.setPower(0);
-    SFdist(30, 0.4, RightTurn, true, LeftTurn, 90, true);
-    drivedist(2, 0.4, 10000, false, 90, true);
+    SFdist(32, 0.4, RightTurn, true, LeftTurn, 90, true);
+    drivedist(1, 0.4, 10000, false, 90, true);
 }
 
     public void RunningToTheShopCam (boolean Red_Alliance) {
@@ -714,7 +720,131 @@ else
             RightTurn = false;
             LeftTurn = true;
         }
-        SpinGyro(90,0.2,2000,true,true);
+        if (Red_Alliance && ElementPosition == 1)
+        {ElementPosition = 3;}
+        else if (Red_Alliance && ElementPosition == 2)
+        {ElementPosition = 1;}
+        else if (Red_Alliance && ElementPosition == 3)
+        {ElementPosition = 2;}
+        else
+        {}
+        if (ElementPosition == 1)
+        {
+if (Red_Alliance)
+            drivedist(22, 0.7, 10000, false, 0, true);
+if (!Red_Alliance)
+    drivedist(20, 0.7, 10000, false, 0, true);
+            // lift arm to bottom hub
+            MoveYAxisDeg(800, 0.5, 1000);
+            // turn towards hub 45 degrees
+            SpinGyro(50, 0.5, 10000, LeftTurn, false);
+            drivedeg(200, 0.3, 1000, true, -50, true);
+            // shoots block into hub
+            Intake.setPower(-1);
+            sleep(1000);
+            Intake.setPower(0);
+            drivedeg(-200, -0.7, 1000, true, -45, true);
+            SpinGyro(0, 0.5, 10000, RightTurn, false);
+            drivedist(10, 0.6, 10000, false, 0, true);
+            sleep(1100);
+        }
+        else if (ElementPosition == 2)
+        {
+            // move forward
+            drivedist(27, 0.7, 10000, false, 0, true);
+            // lift arm to middle hub
+            MoveYAxisDeg(1300, 0.7, 1000);
+            // sleep
+            sleep(1300);
+            // turn arm 45 degrees
+            if (!Red_Alliance) {
+                MoveXAxisDeg(1630, .7, 1000);
+            } else if (Red_Alliance) {
+                MoveXAxisDeg(-1630, .7, 1000);
+            }
+
+            // sleep
+            sleep(1500);
+            // shoots block into hub
+            Intake.setPower(-1);
+            sleep(1500);
+            Intake.setPower(0);
+            MoveXAxisDeg(0, 0.6, 1000);
+            sleep(1100);
+            MoveYAxisDeg(1400, 0.6, 1000);
+            sleep(1100);
+            drivedist(10, 0.7, 10000, false, 0, true);
+        }
+        else if (ElementPosition == 3)
+        {
+            // move forward
+            drivedist(27, 0.7, 10000, false, 0, true);
+            // lift arm to middle hub
+            MoveYAxisDeg(2100, 0.6, 1000);
+            // sleep
+            sleep(1500);
+            // turn arm 45 degrees
+            if (!Red_Alliance) {
+                MoveXAxisDeg(1630, .6, 1000);
+            } else if (Red_Alliance) {
+                MoveXAxisDeg(-1630, .6, 1000);
+            }
+            // sleep
+            sleep(1500);
+            // shoots block into hub
+            Intake.setPower(-1);
+            sleep(1500);
+            Intake.setPower(0);
+            MoveXAxisDeg(0, 0.6, 1000);
+            sleep(1300);
+            MoveYAxisDeg(1400, 0.5, 1000);
+            sleep(1100);
+            drivedist(10, 0.7, 10000, false, 0, true);
+        }
+        //spin so we are parallel to the wall
+        SpinGyro(-90, 0.4, 10000, true, false);
+        //Strafe to the wall
+        SFdist(2, 0.5, RightTurn, true, RightTurn, 90, true);
+        SFtime(100,0.5,RightTurn,true,90,true);
+        //Move arm down
+        MoveYAxisDeg(1, 0.6, 5000);
+        // drive into warehouse and pick up object //was 87
+        drivedeg(1000, 0.4, 1000, true, 90, true);
+        while ((IntakeDist.getDistance(DistanceUnit.INCH) >= 3) && (opModeIsActive())){
+            Intake.setPower(1);
+            Drivetime(0.3, 100, false, 90, false);
+        }
+        Intake.setPower(0);
+        // move arm up
+        MoveYAxisDeg(2100, 0.5, 2000);
+        //
+        drivedist(40, 0.4, 100000, true, 90, true);
+        //
+        drivedeg(-1250, -.6, 1000, true, 90, true);
+        // move arm towards hub
+        if (!Red_Alliance) {
+            MoveXAxisDeg(1630,.6,10000);
+        } else if (Red_Alliance) {
+            MoveXAxisDeg(-1630,.6,10000);
+        }
+        sleep(1000);
+        // strafe towards hub
+        SFdist(21, .7, RightTurn, true, LeftTurn, 90, true);
+        // shoot object out
+        Intake.setPower(-0.8);
+        sleep(1100);
+        Intake.setPower(0);
+        // move arm to middle
+        MoveXAxisDeg(0,0.7,2000);
+        // strafe to wall
+        SFdist(2,.5,RightTurn,true,RightTurn,90, true);
+        // move arm down
+        MoveYAxisDeg(1,0.5,1000);
+        // drive into the warehouse
+        drivedeg(2500,0.5,10000,true,90,true);
+        //sleep(10000);
+
+
     }
 
 
@@ -774,6 +904,8 @@ else
             tfod.setClippingMargins(0,100,0,0);
         }
 
+        timeleft = 120;
+
        /* if (tfod != null) {
             // getUpdatedRecognitions() will return null if no new information is available since
             // the last time that call was made.
@@ -814,6 +946,8 @@ else
         FrontDist = hardwareMap.get(DistanceSensor.class, "FrontDist");
 
         BackDist = hardwareMap.get(DistanceSensor.class, "BackDist");
+
+        IntakeDist = hardwareMap.get(DistanceSensor.class, "IntakeDist");
 
         xAxisStop = hardwareMap.get(DigitalChannel.class, "xAxisStop");
         xAxisStop.setMode(DigitalChannel.Mode.INPUT);
