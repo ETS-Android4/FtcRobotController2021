@@ -704,6 +704,8 @@ else
 
     SpinGyro(90, 0.3, 1000, RightTurn, true);
     drivedist(3, 0.3, 10000, false, 90, true);
+    // back up more
+    Drivetime(-0.3,400,true,90,true);
     SFdist(7, 0.4, RightTurn, true, RightTurn, 90, true);
     Intake.setPower(0.75);
     sleep(3000);
