@@ -62,6 +62,7 @@ public class FibbyAuto22 extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     double timeleft;
+    double IntakeTime;
 
 
     DigitalChannel xAxisStop;
@@ -86,10 +87,13 @@ public class FibbyAuto22 extends LinearOpMode {
     boolean RunningToTheShopCam = false;
     boolean MadDuckPoints = false;
     boolean MadDuckPointsCam = false;
+    boolean Warehouse = false;
     boolean RightTurn = false;
     boolean LeftTurn = false;
+    boolean PANIC = false;
     float ElementCoordinates = 0;
     int ElementPosition = 0;
+    int LastChance = 100;
 
     double dst_heading;
     public ArrayList allTrackables;
@@ -627,40 +631,40 @@ else
     if (ElementPosition == 1)
     {
         if (Red_Alliance)
-        drivedist(22, 0.3, 10000, false, 0, true);
+        drivedist(18, 0.7, 10000, false, 0, true);
         // move forward
         //if (!Red_Alliance)
         //drivedist(30, 0.6, 10000, false, 0, true);
         // lift arm to bottom hub
-        MoveYAxisDeg(800, 0.5, 1000);
+        MoveYAxisDeg(800, 0.7, 1000);
         if (!Red_Alliance)
-        drivedist(28, 0.3, 10000, false, 0, true);
+        drivedist(28, 0.7, 10000, false, 0, true);
         // turn towards hub 45 degrees
-        SpinGyro(-52, 0.5, 10000, RightTurn, false);
-        drivedeg(200, 0.4, 1000, true, 45, true);
+        SpinGyro(-52, 0.4, 10000, RightTurn, false);
+         drivedeg(100, 0.3, 1000, true, 45, true);
         // shoots block into hub
         Intake.setPower(-1);
         sleep(1000);
         Intake.setPower(0);
-        drivedeg(-200, -0.4, 1000, true, 45, true);
+        drivedeg(-200,-0.7, 1000, true, 45, true);
         SpinGyro(0, 0.4, 10000, LeftTurn, false);
-        drivedist(10, 0.4, 10000, false, 0, true);
-        MoveYAxisDeg(1400, 0.5, 1000);
+        drivedist(14, 0.7, 10000, false, 0, true);
+        MoveYAxisDeg(1400, 0.7, 1000);
         sleep(1100);
     }
     else if (ElementPosition == 2)
     {
         // move forward
-        drivedist(30, 0.5, 10000, false, 0, true);
+        drivedist(30, 0.7, 10000, false, 0, true);
         // lift arm to middle hub
-        MoveYAxisDeg(1200, 0.5, 1000);
+        MoveYAxisDeg(1200, 0.7, 1000);
         // sleep
         sleep(1500);
         // turn arm 45 degrees
         if (Red_Alliance) {
-            MoveXAxisDeg(1630, .5, 1000);
+            MoveXAxisDeg(700, .7, 1000);//1630 0.5
         } else if (!Red_Alliance) {
-            MoveXAxisDeg(-1630, .5, 1000);
+            MoveXAxisDeg(-700, 0.7, 1000);//-1630 0.5
         }
 
         // sleep
@@ -669,25 +673,25 @@ else
         Intake.setPower(-1);
         sleep(1500);
         Intake.setPower(0);
-        MoveXAxisDeg(0, 0.5, 1000);
+        MoveXAxisDeg(0, 0.7, 1000);// 0.5
         sleep(1100);
-        MoveYAxisDeg(1400, 0.5, 1000);
+        MoveYAxisDeg(1400, 0.7, 1000);
         sleep(1100);
-        drivedist(10, 0.4, 10000, false, 0, true);
+        drivedist(14, 0.5, 10000, false, 0, true);
     }
     else if (ElementPosition == 3)
     {
-        // move forward
-        drivedist(30, 0.5, 10000, false, 0, true);
         // lift arm to middle hub
-        MoveYAxisDeg(2100, 0.5, 1000);
+        MoveYAxisDeg(2100, 0.7, 1000);
+        // move forward
+        drivedist(30, 0.7, 10000, false, 0, true);
         // sleep
-        sleep(1500);
+        //sleep(1500);
         // turn arm 45 degrees
         if (Red_Alliance) {
-            MoveXAxisDeg(1630, .5, 1000);
+            MoveXAxisDeg(650, .7, 1000);//1630 0.5
         } else if (!Red_Alliance) {
-            MoveXAxisDeg(-1630, .5, 1000);
+            MoveXAxisDeg(-650, 0.7, 1000);//-1630 0.5
         }
         // sleep
         sleep(1500);
@@ -695,23 +699,45 @@ else
         Intake.setPower(-1);
         sleep(1500);
         Intake.setPower(0);
-        MoveXAxisDeg(0, 0.5, 1000);
+        MoveXAxisDeg(0, 0.7, 1000);//0.5
         sleep(1300);
-        MoveYAxisDeg(1400, 0.5, 1000);
+        MoveYAxisDeg(1400, 0.7, 1000);
         sleep(1100);
-        drivedist(10, 0.4, 10000, false, 0, true);
+        drivedist(14, 0.5, 10000, false, 0, true);
     }
 
-    SpinGyro(90, 0.3, 1000, RightTurn, true);
-    drivedist(3, 0.3, 10000, false, 90, true);
+    //SpinGyro(90, 0.4, 1000, RightTurn, true);
+    Drivetime(-0.6,1000,true,90,true);
+    if (Red_Alliance){}
+    else
+        MoveXAxisDeg(-240,0.5,10000);
+    drivedist(3, 0.25, 10000, false, 90, true);
     // back up more
-    Drivetime(-0.3,400,true,90,true);
+    Drivetime(-0.25,400,true,90,true);
+    if (Red_Alliance)
     SFdist(7, 0.4, RightTurn, true, RightTurn, 90, true);
-    Intake.setPower(0.75);
+    else
+        SFdist(12, 0.4, RightTurn, true, RightTurn, 90, true);
+    Intake.setPower(0.50);
     sleep(3000);
     Intake.setPower(0);
-    SFdist(32, 0.4, RightTurn, true, LeftTurn, 90, true);
-    drivedist(1, 0.4, 10000, false, 90, true);
+        MoveXAxisDeg(0, 0.7, 1000);
+        MoveYAxisDeg(5, 0.3, 1000);
+
+
+    if (Warehouse){
+
+        SFdist(50, 0.7, RightTurn, false, LeftTurn, 90, true);
+        SF(400, 0.7, 1000, LeftTurn, true, 90, true);
+        drivedist(50, 0.7, 1000, false, 90, true);
+        drivedeg(450, 0.3, 1000, false, 90, false);
+        SF(1500, 0.4, 1000, RightTurn, true, 90, true);
+        drivedist(15, 1, 2000, true, 90, false);
+    }
+    else {
+        SFdist(30, 0.4, RightTurn, true, LeftTurn, 90, true);
+        Drivetime(-0.25,400,true,90,true);
+    }
 }
 
     public void RunningToTheShopCam (boolean Red_Alliance) {
@@ -722,132 +748,266 @@ else
             RightTurn = false;
             LeftTurn = true;
         }
-        if (Red_Alliance && ElementPosition == 1)
-        {ElementPosition = 3;}
-        else if (Red_Alliance && ElementPosition == 2)
-        {ElementPosition = 1;}
-        else if (Red_Alliance && ElementPosition == 3)
-        {ElementPosition = 2;}
-        else
-        {}
-        if (ElementPosition == 1)
-        {
-if (Red_Alliance)
-            drivedist(22, 0.7, 10000, false, 0, true);
-if (!Red_Alliance)
-    drivedist(20, 0.7, 10000, false, 0, true);
-            // lift arm to bottom hub
-            MoveYAxisDeg(800, 0.5, 1000);
-            // turn towards hub 45 degrees
-            SpinGyro(50, 0.5, 10000, LeftTurn, false);
-            drivedeg(200, 0.3, 1000, true, -50, true);
-            // shoots block into hub
-            Intake.setPower(-1);
-            sleep(1000);
-            Intake.setPower(0);
-            drivedeg(-200, -0.7, 1000, true, -45, true);
-            SpinGyro(0, 0.5, 10000, RightTurn, false);
-            drivedist(10, 0.6, 10000, false, 0, true);
-            sleep(1100);
+        if (Red_Alliance && ElementPosition == 1) {
+            ElementPosition = 3;
+        } else if (Red_Alliance && ElementPosition == 2) {
+            ElementPosition = 1;
+        } else if (Red_Alliance && ElementPosition == 3) {
+            ElementPosition = 2;
+        } else {
         }
-        else if (ElementPosition == 2)
-        {
-            // move forward
-            drivedist(27, 0.7, 10000, false, 0, true);
-            // lift arm to middle hub
-            MoveYAxisDeg(1300, 0.7, 1000);
-            // sleep
-            sleep(1300);
-            // turn arm 45 degrees
-            if (!Red_Alliance) {
-                MoveXAxisDeg(1630, .7, 1000);
-            } else if (Red_Alliance) {
-                MoveXAxisDeg(-1630, .7, 1000);
+        //while ((!PANIC) || (!opModeIsActive())) {
+            if (ElementPosition == 1) {
+                // lift arm to bottom hub
+                MoveYAxisDeg(820, 0.7, 1000);
+                if (Red_Alliance)
+                    drivedist(17, 0.7, 10000, false, 0, true);
+                if (!Red_Alliance)
+                    drivedist(17, 0.7, 10000, false, 0, true);
+                // turn towards hub 45 degrees
+                SpinGyro(55, 0.5, 10000, LeftTurn, false);
+                drivedeg(170, 0.25, 1000, true, -55, true);
+                // shoots block into hub
+                while ((IntakeDist.getDistance(DistanceUnit.INCH) <= 2.5) && (opModeIsActive())) {
+                    Intake.setPower(-0.8);
+                }
+                //sleep(1100);
+                Intake.setPower(0);
+                drivedeg(-100, -0.7, 1000, true, -45, true);
+                SpinGyro(0, 0.6, 10000, RightTurn, false);
+                //sleep(1100);
+                if (Red_Alliance)
+                    drivedist(23, 0.8, 10000, false, 0, true);
+                if (!Red_Alliance)
+                    drivedist(23, 0.8, 10000, false, 0, true);
+            } else if (ElementPosition == 2) {
+                // lift arm to middle hub
+                MoveYAxisDeg(1350, 0.7, 1000);
+                // move forward
+                drivedist(27, 0.5, 10000, false, 0, true);
+                // sleep
+                //  sleep(100);
+                // turn arm 45 degrees
+                if (!Red_Alliance) {
+                    MoveXAxisDeg(470, .6, 1000);//1630 0.7
+                } else if (Red_Alliance) {
+                    MoveXAxisDeg(-500, .6, 1000);//-1630 0.7
+                }
+
+                // sleep
+                sleep(1500);
+                // shoots block into hub
+                while ((IntakeDist.getDistance(DistanceUnit.INCH) <= 2.5) && (opModeIsActive())) {
+                    Intake.setPower(-0.8);
+                }
+                //sleep(1100);
+                Intake.setPower(0);
+                MoveXAxisDeg(0, 0.7, 1000);//0.6
+                drivedist(30, 0.5, 10000, false, 0, true);
+                //sleep(500);
+                MoveYAxisDeg(1400, 0.5, 1000);
+                //sleep(1100);
+            } else if (ElementPosition == 3) {
+                // lift arm to top hub
+                MoveYAxisDeg(2100, 0.6, 1000);
+                // move forward was 27
+                if (Red_Alliance)
+                    drivedist(27, 0.6, 10000, false, 0, true);
+                else
+                    drivedist(32, 0.6, 10000, false, 0, true);
+                // sleep
+                //sleep(1500);
+                // turn arm 45 degrees
+                if (!Red_Alliance) {
+                    MoveXAxisDeg(600, .7, 1000);//1630 0.6
+                } else if (Red_Alliance) {
+                    MoveXAxisDeg(-600, .7, 1000);//-1630 .6
+                }
+                // sleep
+                sleep(1500);
+                // shoots block into hub
+                while ((IntakeDist.getDistance(DistanceUnit.INCH) <= 2.5) && (opModeIsActive())) {
+                    Intake.setPower(-0.8);
+                }
+                //sleep(1100);
+                Intake.setPower(0);
+                MoveXAxisDeg(0, 0.7, 1000);//0.6
+                drivedist(30, 0.5, 10000, false, 0, true);
+                //sleep(500);
+                MoveYAxisDeg(1400, 0.5, 1000);
+                //sleep(1100);
             }
-
-            // sleep
-            sleep(1500);
-            // shoots block into hub
-            Intake.setPower(-1);
-            sleep(1500);
-            Intake.setPower(0);
-            MoveXAxisDeg(0, 0.6, 1000);
-            sleep(1100);
-            MoveYAxisDeg(1400, 0.6, 1000);
-            sleep(1100);
-            drivedist(10, 0.7, 10000, false, 0, true);
-        }
-        else if (ElementPosition == 3)
-        {
-            // move forward
-            drivedist(27, 0.7, 10000, false, 0, true);
-            // lift arm to middle hub
-            MoveYAxisDeg(2100, 0.6, 1000);
-            // sleep
-            sleep(1500);
-            // turn arm 45 degrees
-            if (!Red_Alliance) {
-                MoveXAxisDeg(1630, .6, 1000);
-            } else if (Red_Alliance) {
-                MoveXAxisDeg(-1630, .6, 1000);
+            //Strafe to the wall
+            SFdist(3, 0.6, RightTurn, true, RightTurn, 90, true);
+            //Move arm down
+            MoveYAxisDeg(1, 0.5, 5000);
+            // drive into warehouse and pick up object //was 87
+            //block 2
+            IntakeTime = 5;
+            drivedeg(300, 0.4, 700, false, 93, true);
+            while ((IntakeDist.getDistance(DistanceUnit.INCH) >= 2.5) && (opModeIsActive())) {
+                //IntakeTime = 25;
+                Intake.setPower(1);
+                IntakeTime = IntakeTime - 0.1;
+                if (IntakeTime > 0)
+                    Drivetime(0.30, 10, false, 90, false);
+                else if ((IntakeTime <= 0 )&&( IntakeTime > -5)) {
+                    Drivetime(-0.20, 250, true, 90, false);
+                      Drivetime(0.20, 300, true, 80, false);
+                    //   Drivetime(-0.20, 40, true, -30, false);
+                }
+               // else if (IntakeTime <= -3){
+                 //   PANIC = true;
+               // }
             }
-            // sleep
-            sleep(1500);
-            // shoots block into hub
-            Intake.setPower(-1);
-            sleep(1500);
             Intake.setPower(0);
-            MoveXAxisDeg(0, 0.6, 1000);
-            sleep(1300);
-            MoveYAxisDeg(1400, 0.5, 1000);
-            sleep(1100);
-            drivedist(10, 0.7, 10000, false, 0, true);
+            // move arm up
+            MoveYAxisDeg(2100, 0.5, 2000);
+            //
+            drivedist(40, 0.8, 100000, true, 83, true);
+            //
+            if (!Red_Alliance)
+                drivedeg(-400, -0.9, 0, true, 86, true);
+            else
+                drivedeg(-400, -0.9, 0, true, 86, true);
+            // move arm towards hub
+            if (!Red_Alliance) {
+                MoveXAxisDeg(750, .7, 10000);//1630 0.6
+            } else if (Red_Alliance) {
+                MoveXAxisDeg(-750, .7, 10000);//1630 0.6
+            }
+            //sleep(1000);
+            // strafe towards hub
+        if (!Red_Alliance)
+            SFdist(26, 0.6, RightTurn, true, LeftTurn, 90, true);
+        if (Red_Alliance)
+            SFdist(24, 0.6, RightTurn, true, LeftTurn, 90, true);
+            // shoot object out
+            while ((IntakeDist.getDistance(DistanceUnit.INCH) <= 2.5) && (opModeIsActive())) {
+                Intake.setPower(-0.8);
+                sleep(100);
+            }
+            //sleep(1100);
+            Intake.setPower(0);
+            // move arm to middle
+            MoveXAxisDeg(0, 0.5, 2000);//0.7
+            // strafe to wall
+            SFdist(3, .6, RightTurn, true, RightTurn, 90, true);
+            // move arm down
+            MoveYAxisDeg(2, 0.6, 1000);
+            // drive into the warehouse the second time block 3
+            drivedeg(900, 0.4, 1000, false, 92, true);
+            IntakeTime = 2;
+            while ((IntakeDist.getDistance(DistanceUnit.INCH) >= 2.5) && (opModeIsActive())) {
+                //IntakeTime = 25;
+                Intake.setPower(1);
+                IntakeTime = IntakeTime - 0.1;
+                if (IntakeTime > 0)
+                    Drivetime(0.30, 10, false, 90, false);
+                else if (IntakeTime <= 0) {
+                    Drivetime(-0.20, 250, true, 90, true);
+                    Drivetime(0.20, 300, true, 80, true);
+                    //   Drivetime(-0.20, 40, true, -30, false);
+                }
+                //else if (IntakeTime <= -2){
+                //    PANIC = true;
+               // }
+            }
+            Intake.setPower(0);
+            // move arm up
+            MoveYAxisDeg(2100, 0.5, 2000);
+            //
+            drivedist(40, 0.8, 100000, true, 80, true);
+            //
+            if (!Red_Alliance)
+                drivedeg(-400, -0.9, 0, true, 86, true);
+            else
+                drivedeg(-400, -0.9, 0, true, 86, true);
+            // move arm towards hub
+            if (!Red_Alliance) {
+                MoveXAxisDeg(750, .7, 10000);//1630 0.6
+            } else if (Red_Alliance) {
+                MoveXAxisDeg(-750, .7, 10000);//1630 0.6
+            }
+            //sleep(1000);
+            // strafe towards hub
+        if (!Red_Alliance)
+            SFdist(26, 0.6, RightTurn, true, LeftTurn, 90, true);
+        if (Red_Alliance)
+            SFdist(24, 0.6, RightTurn, true, LeftTurn, 90, true);
+            // shoot object out
+            while ((IntakeDist.getDistance(DistanceUnit.INCH) <= 2.5) && (opModeIsActive())) {
+                Intake.setPower(-0.8);
+                sleep(100);
+            }
+            //sleep(1100);
+            Intake.setPower(0);
+            // move arm to middle
+            MoveXAxisDeg(0, 0.6, 2000);//0.7
+            // strafe to wall
+            SFdist(3, .6, RightTurn, true, RightTurn, 90, true);
+            // move arm down
+            MoveYAxisDeg(1, 0.6, 1000);
+            // block 4
+            drivedeg(900, 0.4, 1000, false, 92, true);
+            IntakeTime = 5;
+            while ((IntakeDist.getDistance(DistanceUnit.INCH) >= 2.5) && (opModeIsActive())){
+                //IntakeTime = 25;
+                Intake.setPower(1);
+                IntakeTime = IntakeTime - 0.1;
+                if (IntakeTime > 0)
+                    Drivetime(0.30, 10, false, 90, false);
+                else if ((IntakeTime <= 0 )&&( IntakeTime > -5)) {
+                    Drivetime(-0.20, 250, true, 90, false);
+                    Drivetime(0.20, 300, true, 80, false);
+                 //   Drivetime(-0.20, 40, true, -30, false);
+                }
+               // else if (IntakeTime <= -2) {
+                 //   PANIC = true;
+              //  }
+            }
+            Intake.setPower(0);
+            // move arm up
+            MoveYAxisDeg(2100, 0.5, 2000);
+            //
+            drivedist(40, 0.8, 100000, true, 80, true);
+            //
+            if (!Red_Alliance)
+                drivedeg(-400, -0.9, 0, true, 86, true);
+            else// if red alliance
+                drivedeg(-400, -0.9, 0, true, 86, true);
+            // move arm towards hub
+            if (!Red_Alliance) {
+                MoveXAxisDeg(750, .7, 10000);//1630 0.6
+            } else if (Red_Alliance) {
+                MoveXAxisDeg(-750, .7, 10000);//1630 0.6
+            }
+            //sleep(1000);
+            // strafe towards hub
+        if (!Red_Alliance)
+            SFdist(26, 0.6, RightTurn, true, LeftTurn, 90, true);
+        if (Red_Alliance)
+            SFdist(24, 0.6, RightTurn, true, LeftTurn, 90, true);
+            // shoot object out
+            while ((IntakeDist.getDistance(DistanceUnit.INCH) <= 2.5) && (opModeIsActive())) {
+                Intake.setPower(-0.8);
+                sleep(100);
+            }
+            //sleep(1100);
+            Intake.setPower(0);
+            // move arm to middle
+            MoveXAxisDeg(0, 0.6, 2000);//0.7
+            // strafe to wall
+            SFdist(3, .6, RightTurn, true, RightTurn, 90, true);
+            // move arm down
+            MoveYAxisDeg(1, 0.6, 1000);
+            // drive into the warehouse
+            if (!Red_Alliance)
+                drivedist(20, 1, 1000, true, 92, true);
+            else
+                drivedist(20, 1, 1000, true, 92, true);
+            //PANIC = true;
         }
-        //spin so we are parallel to the wall
-        SpinGyro(-90, 0.4, 10000, true, false);
-        //Strafe to the wall
-        SFdist(2, 0.5, RightTurn, true, RightTurn, 90, true);
-        SFtime(100,0.5,RightTurn,true,90,true);
-        //Move arm down
-        MoveYAxisDeg(1, 0.6, 5000);
-        // drive into warehouse and pick up object //was 87
-        drivedeg(1000, 0.4, 1000, true, 90, true);
-        while ((IntakeDist.getDistance(DistanceUnit.INCH) >= 3) && (opModeIsActive())){
-            Intake.setPower(1);
-            Drivetime(0.3, 100, false, 90, false);
-        }
-        Intake.setPower(0);
-        // move arm up
-        MoveYAxisDeg(2100, 0.5, 2000);
-        //
-        drivedist(40, 0.4, 100000, true, 90, true);
-        //
-        drivedeg(-1250, -.6, 1000, true, 90, true);
-        // move arm towards hub
-        if (!Red_Alliance) {
-            MoveXAxisDeg(1630,.6,10000);
-        } else if (Red_Alliance) {
-            MoveXAxisDeg(-1630,.6,10000);
-        }
-        sleep(1000);
-        // strafe towards hub
-        SFdist(21, .7, RightTurn, true, LeftTurn, 90, true);
-        // shoot object out
-        Intake.setPower(-0.8);
-        sleep(1100);
-        Intake.setPower(0);
-        // move arm to middle
-        MoveXAxisDeg(0,0.7,2000);
-        // strafe to wall
-        SFdist(2,.5,RightTurn,true,RightTurn,90, true);
-        // move arm down
-        MoveYAxisDeg(1,0.5,1000);
-        // drive into the warehouse
-        drivedeg(2500,0.5,10000,true,90,true);
-        //sleep(10000);
-
-
-    }
 
 
 //--------------------------------------------------------------------------------------------------------------------------------
@@ -905,8 +1065,10 @@ if (!Red_Alliance)
             tfod.setZoom(1, 16.0/9.0);
             tfod.setClippingMargins(0,100,0,0);
         }
-
-        timeleft = 120;
+        timeleft = 30 - runtime.seconds();
+       // timeleft = 30;
+        //IntakeTime = 30 - runtime.seconds();
+       // IntakeTime = 30;
 
        /* if (tfod != null) {
             // getUpdatedRecognitions() will return null if no new information is available since
@@ -976,10 +1138,10 @@ if (!Red_Alliance)
         xAxis.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //
 
-        xAxis.setTargetPosition(-70);
+        xAxis.setTargetPosition(-25);
         xAxis.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        xAxis.setPower(0.1);
-        while(xAxis.getCurrentPosition() >=-65)
+        xAxis.setPower(0.2);
+        while(xAxis.getCurrentPosition() >=-15)
         {}
         xAxis.setPower(0);
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -1005,30 +1167,48 @@ if (!Red_Alliance)
         }
 
         QuestionAnswered = false;
-        telemetry.addLine("Y for RunningToTheShop - A for MadDuckPoints - X for MadDuckPointsCam - B for RunningToTheShopCam");
+        telemetry.addLine(" | Fibonacci Autonomous Run | ");
+        telemetry.addLine("Y:                            ");
+        telemetry.addLine("A:                            ");
+        telemetry.addLine("X: MadDuckPointsCam           ");
+        telemetry.addLine("B: RunningToTheShopCam        ");
         telemetry.update();
         sleep (1000);
         while (QuestionAnswered == false) {
             if (gamepad1.y) {
-                //RunningToTheShop
-                telemetry.addLine("RunningToTheShop");
+                //
+                telemetry.addLine("wrong bad");
                 RunningToTheShop = true;
                 QuestionAnswered = true;
             }
             if (gamepad1.a){
-                //MadDuckPoints
-                telemetry.addLine("MadDuckPoints");
+                //
+                telemetry.addLine("wrong bad");
                 MadDuckPoints = true;
                 QuestionAnswered = true;
             }
             if (gamepad1.x) {
-                //MadDuckPointsRed
+                //MadDuckPointsCam
                 telemetry.addLine("MadDuckPointsCam");
-                MadDuckPointsCam = true;
+                while (QuestionAnswered == false){
+                    MadDuckPointsCam = true;
+                    telemetry.addLine("| Warehouse |");
+                    telemetry.addLine("    A: Yes   ");
+                    telemetry.addLine("    B: No    ");
+                    telemetry.update();
+                    if (gamepad1.a){
+                        Warehouse = true;
+                        QuestionAnswered = true;
+                    }
+                    else if (gamepad1.b){
+                        Warehouse = false;
+                        QuestionAnswered = true;
+                    }
+                }
                 QuestionAnswered = true;
             }
             if (gamepad1.b) {
-                //RunningToTheShop
+                //RunningToTheShopCam
                 telemetry.addLine("RunningToTheShopCam");
                 RunningToTheShopCam = true;
                 QuestionAnswered = true;
@@ -1082,15 +1262,13 @@ if (!Red_Alliance)
                blinkinLedDriver.setPattern(pattern);}
                break;
        }
-       // sleep(5000);
-
 
         if (RunningToTheShop)
-        {
-            RunningToTheShop(Red_alliance);
+        {// took out old auto becalse we have changed our motors and this would break our robot to run so i am not going to give the option
+         //   RunningToTheShop(Red_alliance);
         }
         else if (MadDuckPoints){
-            MadDuckPoints(Red_alliance);
+          //  MadDuckPoints(Red_alliance);
         }
         else if (MadDuckPointsCam){
             MadDuckPointsCam(Red_alliance);
