@@ -1112,7 +1112,7 @@ else
        // DuckSpinner.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         AutoTransitioner.transitionOnStop(this, "FibbyTeleOp22");
-        if (yAxisStop.getState()==true) //Is the arm all the way down on the limit switch?
+        if (yAxisStop.getState()) //Is the arm all the way down on the limit switch?
             while (xAxisStop.getState()== false)  xAxis.setPower(0.2);//Move the arm right until the limit switch is triggered
         xAxis.setPower(0);
         xAxis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
